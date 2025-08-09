@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+notebooks/
+.ipynb_checkpoints/
+
+# VS Code settings (optional)
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Streamlit cache folder
+.streamlit/
+
+# Data files (if you want to exclude large or raw data files)
+data/
