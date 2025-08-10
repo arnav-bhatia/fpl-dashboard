@@ -1,7 +1,9 @@
+from typing import Tuple, Dict, List, Any
 import requests
-from typing import Tuple, Dict, List
 
-def read_load_player_data(PLAYER_URL="https://fantasy.premierleague.com/api/bootstrap-static/"):
+#Loading data from FPL API
+
+def read_load_player_data(PLAYER_URL: str = "https://fantasy.premierleague.com/api/bootstrap-static/") -> Dict[str, Any]:
     """
     Loads player data from the FPL API and returns it in json format.
 
@@ -26,8 +28,7 @@ def read_load_player_data(PLAYER_URL="https://fantasy.premierleague.com/api/boot
     except Exception as err:
         raise RuntimeError(f"An error occurred while fetching player data: {err}")
 
-
-def read_load_fixtures_data(FIXTURES_URL="https://fantasy.premierleague.com/api/fixtures/"):
+def read_load_fixtures_data(FIXTURES_URL: str = "https://fantasy.premierleague.com/api/fixtures/") -> Dict[str, Any]:
     """
     Loads fixture data from the FPL API and returns it in json format.
 
@@ -52,7 +53,9 @@ def read_load_fixtures_data(FIXTURES_URL="https://fantasy.premierleague.com/api/
     except Exception as err:
         raise RuntimeError(f"An error occurred while fetching fixture data: {err}")
 
-def get_pl_teams_dict_and_list(player_json):
+#Mapping dictionaries and lists
+
+def get_pl_teams_dict_and_list(player_json: Dict[str, Any]) -> Tuple[Dict[int, str], List[str]]:
     """
     Returns all Premier League teams and their FPL ids.
 
@@ -63,13 +66,12 @@ def get_pl_teams_dict_and_list(player_json):
         pl_teams_dict (dict): Team ID to team name mapping.
         pl_teams_list (list): List of all team names.
     """
-    pl_teams_dict = {}
-    pl_teams_list = []
+    pl_teams_dict: Dict[int, str] = {}
+    pl_teams_list: List[str] = []
     for team in player_json["teams"]:
         pl_teams_dict[team["id"]] = team["name"]
         pl_teams_list.append(team["name"])
     return pl_teams_dict, pl_teams_list
-
     
 def get_position_dict() -> Dict[int, str]:
     """
