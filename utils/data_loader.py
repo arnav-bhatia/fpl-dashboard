@@ -328,3 +328,24 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
         pd.DataFrame: DataFrame containing the team's fixtures.
     """
     return team_fixtures_database.get(team, pd.DataFrame())
+
+def return_top_players_points(player_database, top_n=10):
+    cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 
+            'Selected By (%)', 'Form', 'Value', 'PPG', 'Points']
+    return (
+        player_database[cols]
+        .sort_values(by='Points', ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
+
+def return_top_goalkeepers(player_database, top_n=10):
+    cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
+            'Form', 'Value', 'Clean Sheets', 'Goals Conceded', 
+            'Saves', 'Saves per 90', 'BPS', 'Points']
+    return (
+        player_database[player_database['Position'] == 'Goalkeeper'][cols]
+        .sort_values(by='Points', ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
