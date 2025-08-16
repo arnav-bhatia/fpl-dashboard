@@ -1,5 +1,6 @@
 from typing import Tuple, Dict, List, Any
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+import utils
 import pandas as pd
 from datetime import datetime
 import requests
@@ -330,26 +331,33 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
     """
     return team_fixtures_database.get(team, pd.DataFrame())
 
-def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
-    """
-    Return the top players across all positions based on total points.
-
-    Args:
-        player_database (pd.DataFrame): DataFrame containing player data.
-        top_n (int, optional): Number of top players to return. Defaults to 10.
-
-    Returns:
-        pd.DataFrame: DataFrame of the top players sorted by total points.
-    """
-    cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 
+def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
+    cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 
             'Selected By (%)', 'Form', 'Value', 'PPG', 'Points']
     
-    return (
+    df = (
         player_database[cols]
         .sort_values(by='Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
+
+    # Define col_defs for AgGrid
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "PPG", "field": "PPG", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},
+    ]
+    
+    return df, col_defs
 
 
 def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
@@ -365,15 +373,31 @@ def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd
     """
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Clean Sheets', 'Goals Conceded', 
-            'Saves', 'Saves per 90', 'BPS', 'Points']
+            'Saves', 'BPS', 'Points']
     
-    return (
+    df = (
         player_database[player_database['Position'] == 'Goalkeeper'][cols]
         .sort_values(by='Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
 
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
+        {"headerName": "Saves", "field": "Saves", "flex": 1, "minWidth": 70},
+        {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},    
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},
+    ]
+    
+    return df, col_defs
 
 def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
     """
@@ -389,14 +413,35 @@ def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.D
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Clean Sheets', 'Goals Conceded', 
             'Defensive Contribution', 'ICT Index', 'ICT Index Rank Type', 
-            'Assists', 'Goals Scored', 'Points']
+            'Assists', 'Goals Scored', 'Points', 'BPS']
     
-    return (
+    df =  (
         player_database[player_database['Position'] == 'Defender'][cols]
         .sort_values(by='Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
+
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
+        {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
+        {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
+        {"headerName": "DC", "field": "Defensive Contribution", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT", "field": "ICT Index", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT Rank", "field": "ICT Index Rank Type", "flex": 1, "minWidth": 70},
+        {"headerName": "Assists", "field": "Assists", "flex": 1, "minWidth": 70},
+        {"headerName": "Goals", "field": "Goals Scored", "flex": 1, "minWidth": 70},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},    
+    ]
+    
+    return df, col_defs
 
 
 def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
@@ -415,13 +460,32 @@ def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd
             'Expected Goal Involvements', 'ICT Index', 
             'ICT Index Rank Type', 'Assists', 'Goals Scored', 'Points']
     
-    return (
+    df =  (
         player_database[player_database['Position'] == 'Midfielder'][cols]
         .sort_values(by='Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
 
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
+        {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
+        {"headerName": "DC", "field": "Defensive Contribution", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT", "field": "ICT Index", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT Rank", "field": "ICT Index Rank Type", "flex": 1, "minWidth": 70},
+        {"headerName": "Assists", "field": "Assists", "flex": 1, "minWidth": 70},
+        {"headerName": "Goals", "field": "Goals Scored", "flex": 1, "minWidth": 70},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},    
+    ]
+    
+    return df, col_defs
 
 def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
     """
@@ -437,76 +501,73 @@ def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.Da
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Expected Goal Involvements', 
             'ICT Index', 'ICT Index Rank Type', 'Assists', 
-            'Expected Goals', 'Goals Scored', 'Points']
+            'Expected Goals', 'Goals Scored', 'Points', 'BPS']
     
-    return (
+    df =  (
         player_database[player_database['Position'] == 'Forward'][cols]
         .sort_values(by='Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
 
-from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
+        {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
+        {"headerName": "Assists", "field": "Assists", "flex": 1, "minWidth": 70},
+        {"headerName": "Goals", "field": "Goals Scored", "flex": 1, "minWidth": 70},
+        {"headerName": "xG", "field": "Expected Goals", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT", "field": "ICT Index", "flex": 1, "minWidth": 70},
+        {"headerName": "ICT Rank", "field": "ICT Index Rank Type", "flex": 1, "minWidth": 70},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},    
+    ]
+    
+    return df, col_defs
 
-def build_aggrid_table(df):
-    """
-    Builds and displays an AgGrid table with polished styling:
-    - Alternating row colors
-    - Colored column headers
-    - Auto-sized columns
-    - Sortable, filterable, resizable columns
-
-    Args:
-        df (pd.DataFrame): DataFrame to display in AgGrid.
-
-    Returns:
-        AgGrid: Streamlit AgGrid table component.
-    """
+def build_aggrid_table(df, col_defs=None):
     gb = GridOptionsBuilder.from_dataframe(df)
-    
-    # Enable pagination
-    gb.configure_pagination(paginationAutoPageSize=True)
-    
-    # Default column config
-    gb.configure_default_column(resizable=True, sortable=True, filter=True, autoSizeColumns=True)
-    
-    # Alternating row colors using JsCode
-    row_style = JsCode("""
-        function(params) {
-            if (params.node.rowIndex % 2 === 0) {
-                return {'background-color': '#f9f9f9'};
-            } else {
-                return {'background-color': '#ffffff'};
-            }
-        }
-    """)
-    gb.configure_grid_options(getRowStyle=row_style)
-    
-    # Header style using JsCode
-    header_style = JsCode("""
-        function(params) {
-            params.column.getColDef().headerClass = 'header-blue';
-        }
-    """)
-
-    for col in df.columns:
-        gb.configure_column(col, header_class=header_style)
+    gb.configure_pagination(enabled=False)
+    gb.configure_default_column(resizable=True, filter=False, sortable=True)
 
     grid_options = gb.build()
 
-    custom_css = [
-        {
-            "selector": ".header-blue",
-            "rule": "background-color: #1976d2; color: white; font-weight: bold;"
+    # Apply custom column defs if provided
+    if col_defs:
+        grid_options["columnDefs"] = col_defs
+    else:
+        grid_options["autoSizeStrategy"] = {"type": "fitCellContents"}
+
+
+    row_style = JsCode("""
+        function(params) {
+            if (params.node.rowIndex % 2 === 0) {
+                return {'background-color': '#ffc1c1', 'color': 'black'};
+            } else {
+                return {'background-color': '#ffffff', 'color': 'black'};
+            }
         }
-    ]
+    """)
+    grid_options["getRowStyle"] = row_style
+
+    custom_css = {
+        ".ag-header-cell": {
+            "background-color": "#1976d2 !important",
+            "color": "white !important",
+            "font-weight": "bold !important",
+            "text-align": "center"
+        }
+    }
 
     return AgGrid(
         df,
         gridOptions=grid_options,
-        height=370,
-        fit_columns_on_grid_load=True,
-        theme='fresh',
+        height=340,
         allow_unsafe_jscode=True,
         custom_css=custom_css
     )
