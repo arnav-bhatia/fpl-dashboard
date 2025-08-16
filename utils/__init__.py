@@ -19,6 +19,8 @@ from .data_loader import (
     build_aggrid_table,
 )
 
+from .agstyler import (get_numeric_style_with_precision, draw_grid, highlight)
+
 __all__ = [
     "load_player_data",
     "load_fixtures_data",
@@ -38,4 +40,7 @@ __all__ = [
     "return_top_midfielders",
     "return_top_forwards",
     "build_aggrid_table",
+    "get_numeric_style_with_precision",
+    "draw_grid",
+    "highlight"
 ]
