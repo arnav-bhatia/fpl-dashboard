@@ -9,31 +9,6 @@ st.set_page_config(
 
 st.title('FPL Analyzer')
 
-def render_title_with_bg(title_text):
-    """
-    Renders a centered title with a light background and rounded corners.
-    """
-    st.markdown(
-        f"""
-        <div style="
-            padding: 1px; 
-            border-radius: 10px; 
-            text-align: center; 
-            margin-bottom: 10px;
-            border: 1px solid #white;
-        ">
-            <h2 style="
-                font-family: 'Segoe UI', Roboto, sans-serif; 
-                color: white; 
-                font-weight: 700;
-                font-size: 24px;
-                margin: 0;
-            ">{title_text}</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
 # Setup
 @st.cache_data
 def load_all_data():
@@ -67,7 +42,7 @@ player_df = data["player_df"]
 
 # Segment 1
 # st.subheader('Top Performers')
-render_title_with_bg('Top Performers')
+utils.render_title_with_bg('Top Performers')
 
 topperformers1, topperformers2 = st.columns(2)
 

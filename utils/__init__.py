@@ -16,12 +16,21 @@ from .data_loader import (
     return_top_defenders,
     return_top_midfielders,
     return_top_forwards,
-    build_aggrid_table,
     get_top_stats_for_player_cards,
-    render_player_card
 )
 
-from .agstyler import (get_numeric_style_with_precision, draw_grid, highlight)
+from .agstyler import (
+    get_numeric_style_with_precision, 
+    draw_grid, 
+    highlight
+)
+
+from  .tools import(
+    build_aggrid_table,
+    render_player_card,
+    render_title_with_bg
+
+)
 
 __all__ = [
     "load_player_data",
@@ -46,5 +55,6 @@ __all__ = [
     "draw_grid",
     "highlight",
     "get_top_stats_for_player_cards",
-    "render_player_card"
+    "render_player_card",
+    "render_title_with_bg"
 ]
