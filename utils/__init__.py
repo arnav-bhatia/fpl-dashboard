@@ -28,7 +28,8 @@ from .agstyler import (
 from  .tools import(
     build_aggrid_table,
     render_player_card,
-    render_title_with_bg
+    render_title_with_bg,
+    render_divider
 
 )
 
@@ -56,5 +57,6 @@ __all__ = [
     "highlight",
     "get_top_stats_for_player_cards",
     "render_player_card",
-    "render_title_with_bg"
+    "render_title_with_bg",
+    "render_divider"
 ]

@@ -51,6 +51,7 @@ def render_player_card(player_row, stat_label, stat_value):
     """
     player_name = player_row["Name"]
     code = player_row["photo_code"]
+    team = player_row["Club"]
     photo_url = f"https://resources.premierleague.com/premierleague25/photos/players/110x140/{code}.png"
 
     st.markdown(
@@ -58,30 +59,38 @@ def render_player_card(player_row, stat_label, stat_value):
         <div style="
             font-family: 'Segoe UI', Roboto, sans-serif;
             background: #fff0f5;
-            padding: 20px;
+            padding: 10px;
             border-radius: 15px;
             text-align: center;
             border: 1px solid #e1e4e8;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-top: 5px;
             margin-bottom: 15px;
         ">
             <img src="{photo_url}" style="
-                width: 80px;
-                height: 82px;
+                width: 100px;
+                height: 100px;
                 border-radius: 50%;
                 border: 3px solid #f0f0f0;
-                margin-bottom: 15px;
+                margin-bottom: 2px;
                 object-fit: cover;
                 object-position: 0 -5%;
             "><br>
             <strong style="
-                font-size: 1.1em;
+                font-size: 1em;
                 font-weight: 600;
                 color: #333;
                 display: block;
-                margin-bottom: 5px;
+                margin-bottom: 0;
             ">{player_name}</strong>
-            <span style="font-size: 0.8em; color: #6a737d;">
+            <p style="
+                font-size: 0.9em;
+                font-weight: 400;
+                color: #333;
+                display: block;
+                margin-bottom: 0;
+            ">{team}</p>
+            <span style="font-size: 0.9em; color: #6a737d;">
                 {stat_label}: 
                 <span style="color: #000; font-weight: 700;">{stat_value}</span>
             </span>
@@ -101,16 +110,22 @@ def render_title_with_bg(title_text):
             border-radius: 10px; 
             text-align: center; 
             margin-bottom: 10px;
-            border: 1px solid #white;
+            border: 1px solid;
         ">
             <h2 style="
                 font-family: 'Segoe UI', Roboto, sans-serif; 
-                color: white; 
                 font-weight: 700;
                 font-size: 24px;
                 margin: 0;
             ">{title_text}</h2>
         </div>
         """,
+        unsafe_allow_html=True
+    )
+    
+def render_divider():
+    """Renders a thin, gray horizontal line with no vertical margins."""
+    st.markdown(
+        """<hr style="height:1px; margin:0; border:none; background-color:white;" />""",
         unsafe_allow_html=True
     )

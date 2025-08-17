@@ -74,3 +74,5 @@ with topperformers2:
         col = row1[i] if i < 3 else row2[i-3]
         with col:
             utils.render_player_card(player_row, label, stat_value)
+
+utils.render_divider()
