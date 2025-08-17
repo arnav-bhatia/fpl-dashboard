@@ -1,5 +1,5 @@
 from typing import Tuple, Dict, List, Any
-import utils
+from st_aggrid import JsCode
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -412,7 +412,7 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
 
     col_defs = [
         {"headerName": "GW", "field": "Game Week", "flex": 1, "maxWidth": 70},
-        {"headerName": "Opponent", "field": "Opponent", "flex": 2, "minWidth": 120},
+        {"headerName": "Opponent", "field": "Opponent", "flex": 2, "minWidth": 160, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Venue", "field": "Venue", "flex": 1, "minWidth": 100},
         {"headerName": "FDR", "field": "Fixture Difficulty Rating", "flex": 1, "maxWidth": 70, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Date", "field": "Date", "flex": 1, "minWidth": 100},
@@ -439,7 +439,7 @@ def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) ->
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
         {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
         {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},

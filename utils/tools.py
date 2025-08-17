@@ -15,28 +15,7 @@ def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000, alt
     else:
         grid_options["autoSizeStrategy"] = {"type": "fitCellContents"}
 
-    if FDR:
-        # Use Fixture Difficulty Rating colors (1-5)
-        row_style = JsCode("""
-            function(params) {
-                var fdr = params.data.FDR;
-                if (fdr == '1') {
-                    return {'background-color': '#6BBE45', 'color': 'white'};
-                } else if (fdr == '2') {
-                    return {'background-color': '#A1D490', 'color': 'black'};
-                } else if (fdr == '3') {
-                    return {'background-color': '#DDDDDD', 'color': 'black'};
-                } else if (fdr == '4') {
-                    return {'background-color': '#F1A5A0', 'color': 'black'};
-                } else if (fdr == '5') {
-                    return {'background-color': '#E74C3C', 'color': 'white'};
-                }
-            }
-        """)
-        grid_options["getRowStyle"] = row_style
-
-    elif alt_row_colours:
-        # Default alternating row colors
+    if alt_row_colours:
         row_style = JsCode("""
             function(params) {
                 if (params.node.rowIndex % 2 === 0) {
@@ -46,7 +25,30 @@ def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000, alt
                 }
             }
         """)
-        grid_options["getRowStyle"] = row_style    
+        grid_options["getRowStyle"] = row_style
+    
+    elif FDR:
+        row_style = JsCode(f"""
+            function(params) {{
+                var raw = params.data["Fixture Difficulty Rating"];
+                var m = String(raw).match(/\\d+/);
+                if (!m) return null;
+                var fdr = parseInt(m[0], 10);
+
+                // FPL-ish palette
+                var bg = null, color = null;
+                if (fdr === 1) {{ bg = '#364725'; color = 'white'; }}       // green
+                else if (fdr === 2) {{ bg = '#07f978'; color = 'black'; }}  // light green
+                else if (fdr === 3) {{ bg = '#DDDDDD'; color = 'black'; }}  // grey
+                else if (fdr === 4) {{ bg = '#f91952'; color = 'white'; }}  // light red
+                else if (fdr === 5) {{ bg = '#800a30'; color = 'white'; }}  // red
+
+                if (bg) return {{ 'background-color': bg, 'color': color }};
+                return null;
+            }}
+        """)
+
+        grid_options["getRowStyle"] = row_style
 
     custom_css = {
         ".ag-header-cell": {

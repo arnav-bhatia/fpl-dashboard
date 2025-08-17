@@ -95,7 +95,7 @@ utils.render_title_with_bg('Fixtures and Results')
 
 utils.build_aggrid_table(fixtures_df, pagination=True, max_height=370, col_defs=fixture_col_defs)
 
-fixtures1, fixtures2 = st.columns([1,1.75])
+fixtures1, fixtures2 = st.columns([1.3, 1.7])
 
 with fixtures1:
     team_FDR = st.selectbox('Pick a team', options=pl_teams_list)
