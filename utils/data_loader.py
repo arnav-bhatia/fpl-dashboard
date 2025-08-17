@@ -241,7 +241,7 @@ def get_match_time(datetime_str: str) -> str:
     return convert_utc_to_ist(datetime_str).strftime('%I:%M%p').lstrip('0').lower()
 
 
-def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int, str]) -> pd.DataFrame:
+def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int, str], player_df) -> pd.DataFrame:
     """
     Converts fixture JSON into a DataFrame.
 
@@ -254,8 +254,61 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
     """
     fixtures = []
     for match in fixtures_json:
+        h_a = ['h', 'a']
+        home_goals = []
+        away_goals = []
+        home_assists = []
+        away_assists = []
+        bonus_getters = []
         home_team = team_dict.get(match.get("team_h"), "Unknown")
         away_team = team_dict.get(match.get("team_a"), "Unknown")
+
+        try:
+            goals_scored = match['stats'][0]
+            assists = match['stats'][1]
+
+            for team in h_a:
+                # Goals
+                if goals_scored[team]:
+                    for goal in goals_scored[team]:
+                        player_id = goal['element']
+                        player = player_df.loc[player_df['ID'] == player_id, 'Name'].iloc[0]
+                        goals = goal['value']
+                        if team == 'h':
+                            home_goals.append(f"{player}({goals})")
+                        else:
+                            away_goals.append(f"{player}({goals})")
+
+                # Assists
+                if assists[team]:
+                    for assist in assists[team]:
+                        player_id = assist['element']
+                        player = player_df.loc[player_df['ID'] == player_id, 'Name'].iloc[0]
+                        assisted = assist['value']
+                        if team == 'h':
+                            home_assists.append(f"{player}({assisted})")
+                        else:
+                            away_assists.append(f"{player}({assisted})")
+        except:
+            pass
+
+        
+        try:
+            bonus = match['stats'][8]
+            temp_bonus = []
+            for team in h_a:
+                if bonus[team]:
+                    for bp in bonus[team]:
+                        player_id = bp['element']
+                        player = player_df.loc[player_df['ID'] == player_id, 'Name'].iloc[0]
+                        bp_received = int(bp['value'])
+                        temp_bonus.append((player, bp_received))
+
+            temp_bonus.sort(key=lambda x: x[1], reverse=True)
+            bonus_getters = [f"{player}({bp})" for player, bp in temp_bonus]
+
+        except:
+            pass
 
         match_dict = {
             "Gameweek": match.get("event"),
@@ -264,8 +317,14 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
             "Away Team": away_team,
             "Away Team Difficulty": match.get('team_a_difficulty'),
             "Date": match.get('kickoff_time'),
-            "Score": f"{match.get('team_h_score')} : {match.get('team_a_score')}"
+            "Score": f"{match.get('team_h_score')} : {match.get('team_a_score')}",
+            "Home Team Scorers": ", ".join(home_goals) if home_goals else "",
+            "Away Team Scorers": ", ".join(away_goals) if away_goals else "",
+            "Home Team Assisters": ", ".join(home_assists) if home_assists else "",
+            "Away Team Assisters": ", ".join(away_assists) if away_assists else "",
+            "Bonus Points": ", ".join(bonus_getters) if bonus_getters else "",
         }
+
         fixtures.append(match_dict)
 
     fixtures_df = pd.DataFrame(fixtures)
@@ -280,8 +339,13 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
         {"headerName": "Away Team", "field": "Away Team", "flex": 1.5, "minWidth": 100},
         {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Date", "field": "Match Date", "flex": 1, "minWidth": 70},
-        {"headerName": "Time (IST)", "field": "Match Time (IST)", "flex": 1, "minWidth": 70},
+        {"headerName": "Time (IST)", "field": "Match Time (IST)", "flex": 1, "minWidth": 70},        {"headerName": "Home Scorers", "field": "Home Team Scorers", "flex": 2, "minWidth": 100},
+        {"headerName": "Away Scorers", "field": "Away Team Scorers", "flex": 2, "minWidth": 100},
+        {"headerName": "Home Assisters", "field": "Home Team Assisters", "flex": 2, "minWidth": 100},
+        {"headerName": "Away Assisters", "field": "Away Team Assisters", "flex": 2, "minWidth": 100},
+        {"headerName": "Bonus Points", "field": "Bonus Points", "flex": 2, "minWidth": 100},
     ]
+
     return fixtures_df, fixtures_col_defs
 
 
@@ -319,7 +383,9 @@ def create_team_fixtures_database(fixtures_df: pd.DataFrame, team_list: List[str
                 "Venue": venue,
                 'Fixture Difficulty Rating': int(difficulty) if difficulty is not None else None,
                 'Date': game['Match Date'],
-                'Time (IST)': game['Match Time (IST)']
+                'Time (IST)': game['Match Time (IST)'],
+                "Score": game['Score'],
+
             }
             team_fixture_list.append(gw_dict)
 
@@ -340,7 +406,21 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
     Returns:
         pd.DataFrame: DataFrame containing the team's fixtures.
     """
-    return team_fixtures_database.get(team, pd.DataFrame())
+    team_df = team_fixtures_database.get(team, pd.DataFrame())
+    cols_to_str = ['Game Week', 'Fixture Difficulty Rating']
+    team_df[cols_to_str] = team_df[cols_to_str].astype(str)
+
+    col_defs = [
+        {"headerName": "GW", "field": "Game Week", "flex": 1, "maxWidth": 70},
+        {"headerName": "Opponent", "field": "Opponent", "flex": 2, "minWidth": 120},
+        {"headerName": "Venue", "field": "Venue", "flex": 1, "minWidth": 100},
+        {"headerName": "FDR", "field": "Fixture Difficulty Rating", "flex": 1, "maxWidth": 70, "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "Date", "field": "Date", "flex": 1, "minWidth": 100},
+        {"headerName": "Time (IST)", "field": "Time (IST)", "flex": 1, "minWidth": 100},
+        {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 120},
+    ]
+
+    return team_df, col_defs
 
 def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
     cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 

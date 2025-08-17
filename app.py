@@ -18,7 +18,7 @@ def load_all_data():
     position_dict = utils.get_position_dict()
     status_dict = utils.get_status_dict()
     player_df = utils.return_player_df(player_json, pl_teams_dict, status_dict, position_dict)
-    fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict)
+    fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict, player_df)
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     
     return {
@@ -91,13 +91,13 @@ with topperformers2:
 
 utils.render_divider()
 
-utils.render_title_with_bg('Fixtures')
+utils.render_title_with_bg('Fixtures and Results')
 
-utils.build_aggrid_table(fixtures_df, pagination=True, max_height=361, col_defs=fixture_col_defs)
+utils.build_aggrid_table(fixtures_df, pagination=True, max_height=370, col_defs=fixture_col_defs)
 
-fixtures1, fixtures2 = st.columns(2)
+fixtures1, fixtures2 = st.columns([1,1.75])
 
 with fixtures1:
     team_FDR = st.selectbox('Pick a team', options=pl_teams_list)
-    team_FDR_df = utils.get_team_fixtures(team_FDR, fixtures_database)
-    utils.build_aggrid_table(team_FDR_df, pagination=True, max_height=361)
+    team_FDR_df, fdr_coldefs = utils.get_team_fixtures(team_FDR, fixtures_database)
+    utils.build_aggrid_table(team_FDR_df, pagination=True, max_height=370, col_defs=fdr_coldefs, alt_row_colours=False, FDR=True)
