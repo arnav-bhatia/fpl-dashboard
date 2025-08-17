@@ -17,6 +17,8 @@ from .data_loader import (
     return_top_midfielders,
     return_top_forwards,
     build_aggrid_table,
+    get_top_stats_for_player_cards,
+    render_player_card
 )
 
 from .agstyler import (get_numeric_style_with_precision, draw_grid, highlight)
@@ -42,5 +44,7 @@ __all__ = [
     "build_aggrid_table",
     "get_numeric_style_with_precision",
     "draw_grid",
-    "highlight"
+    "highlight",
+    "get_top_stats_for_player_cards",
+    "render_player_card"
 ]

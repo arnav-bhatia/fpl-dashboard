@@ -9,6 +9,31 @@ st.set_page_config(
 
 st.title('FPL Analyzer')
 
+def render_title_with_bg(title_text):
+    """
+    Renders a centered title with a light background and rounded corners.
+    """
+    st.markdown(
+        f"""
+        <div style="
+            padding: 1px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 10px;
+            border: 1px solid #white;
+        ">
+            <h2 style="
+                font-family: 'Segoe UI', Roboto, sans-serif; 
+                color: white; 
+                font-weight: 700;
+                font-size: 24px;
+                margin: 0;
+            ">{title_text}</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Setup
 @st.cache_data
 def load_all_data():
@@ -41,7 +66,8 @@ status_dict = data["status_dict"]
 player_df = data["player_df"]
 
 # Segment 1
-st.subheader('Top Performers')
+# st.subheader('Top Performers')
+render_title_with_bg('Top Performers')
 
 topperformers1, topperformers2 = st.columns(2)
 
@@ -61,3 +87,15 @@ with topperformers1:
         display_df, coldefs = utils.return_top_forwards(player_df)
         
     utils.build_aggrid_table(display_df, col_defs=coldefs)
+with topperformers2:
+    player_cards_dict = utils.get_top_stats_for_player_cards(player_df)
+    row1 = st.columns(3)
+    row2 = st.columns(3)
+
+    for i, (label, df_row) in enumerate(player_cards_dict.items()):
+        player_row = df_row.iloc[0]
+        stat_value = player_row[label]
+
+        col = row1[i] if i < 3 else row2[i-3]
+        with col:
+            utils.render_player_card(player_row, label, stat_value)

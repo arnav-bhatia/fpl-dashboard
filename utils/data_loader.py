@@ -1,6 +1,7 @@
 from typing import Tuple, Dict, List, Any
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 import utils
+import streamlit as st
 import pandas as pd
 from datetime import datetime
 import requests
@@ -146,7 +147,7 @@ def return_player_df(
             "Club": team_dict.get(player.get("team"), "Unknown"),
             "Price": float(player.get("now_cost", 0) / 10),
             "Minutes Played": player.get('minutes'),
-            "Points": player.get("total_points"),
+            "Total Points": player.get("total_points"),
             'Form': player.get('form'),
             'PPG': player.get('points_per_game'),
             'Value': player.get('value_season'),
@@ -167,7 +168,8 @@ def return_player_df(
             'Creativity': player.get('creativity'),
             'Threat': player.get('threat'),
             'ICT Index': player.get('ict_index'),
-            'Defensive Contribution': player.get('defensive_contribution', 0),
+            'photo_code': player.get('code'),
+            'Defensive Contributions': player.get('defensive_contribution', 0),
             'Starts': player.get('starts'),
             'Expected Goals': player.get('expected_goals'),
             'Expected Assists': player.get('expected_assists'),
@@ -333,11 +335,11 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
 
 def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
     cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 
-            'Selected By (%)', 'Form', 'Value', 'PPG', 'Points']
+            'Selected By (%)', 'Form', 'Value', 'PPG', 'Total Points']
     
     df = (
         player_database[cols]
-        .sort_values(by='Points', ascending=False)
+        .sort_values(by='Total Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -348,7 +350,7 @@ def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) ->
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
         {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
         {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
         {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
@@ -373,11 +375,11 @@ def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd
     """
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Clean Sheets', 'Goals Conceded', 
-            'Saves', 'BPS', 'Points']
+            'Saves', 'BPS', 'Total Points']
     
     df = (
         player_database[player_database['Position'] == 'Goalkeeper'][cols]
-        .sort_values(by='Points', ascending=False)
+        .sort_values(by='Total Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -386,7 +388,7 @@ def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
         {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
         {"headerName": "Saves", "field": "Saves", "flex": 1, "minWidth": 70},
         {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
@@ -412,12 +414,12 @@ def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.D
     """
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Clean Sheets', 'Goals Conceded', 
-            'Defensive Contribution', 'ICT Index', 'ICT Index Rank Type', 
-            'Assists', 'Goals Scored', 'Points', 'BPS']
+            'Defensive Contributions', 'ICT Index', 'ICT Index Rank Type', 
+            'Assists', 'Goals Scored', 'Total Points', 'BPS']
     
     df =  (
         player_database[player_database['Position'] == 'Defender'][cols]
-        .sort_values(by='Points', ascending=False)
+        .sort_values(by='Total Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -426,7 +428,7 @@ def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.D
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
         {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
@@ -456,13 +458,13 @@ def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd
         pd.DataFrame: DataFrame of the top midfielders sorted by total points.
     """
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
-            'Form', 'Value', 'Defensive Contribution', 
+            'Form', 'Value', 'Defensive Contributions', 
             'Expected Goal Involvements', 'ICT Index', 'BPS',
-            'ICT Index Rank Type', 'Assists', 'Goals Scored', 'Points']
+            'ICT Index Rank Type', 'Assists', 'Goals Scored', 'Total Points']
     
     df =  (
         player_database[player_database['Position'] == 'Midfielder'][cols]
-        .sort_values(by='Points', ascending=False)
+        .sort_values(by='Total Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -471,10 +473,10 @@ def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
-        {"headerName": "DC", "field": "Defensive Contribution", "flex": 1, "minWidth": 70},
+        {"headerName": "DC", "field": "Defensive Contributions", "flex": 1, "minWidth": 70},
         {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
         {"headerName": "ICT", "field": "ICT Index", "flex": 1, "minWidth": 70},
         {"headerName": "ICT Rank", "field": "ICT Index Rank Type", "flex": 1, "minWidth": 70},
@@ -501,11 +503,11 @@ def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.Da
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Expected Goal Involvements', 
             'ICT Index', 'ICT Index Rank Type', 'Assists', 
-            'Expected Goals', 'Goals Scored', 'Points', 'BPS']
+            'Expected Goals', 'Goals Scored', 'Total Points', 'BPS']
     
     df =  (
         player_database[player_database['Position'] == 'Forward'][cols]
-        .sort_values(by='Points', ascending=False)
+        .sort_values(by='Total Points', ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -514,7 +516,7 @@ def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.Da
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
         {"headerName": "Assists", "field": "Assists", "flex": 1, "minWidth": 70},
@@ -570,4 +572,69 @@ def build_aggrid_table(df, col_defs=None):
         height=340,
         allow_unsafe_jscode=True,
         custom_css=custom_css
+    )
+
+def get_top_stats_for_player_cards(player_df):
+    player_df = player_df.copy()
+    cols_to_numeric = ['Total Points', 'Goals Scored', 'Assists', 'ICT Index', 'Clean Sheets', 'Defensive Contributions']
+    player_df[cols_to_numeric] = player_df[cols_to_numeric].apply(pd.to_numeric, errors='coerce')
+    most_points = player_df.nlargest(1, 'Total Points', keep='first') 
+    most_goals = player_df.nlargest(1, 'Goals Scored', keep='first') 
+    most_assists = player_df.nlargest(1, 'Assists', keep='first') 
+    top_ict = player_df.nlargest(1, 'ICT Index', keep='first') 
+    most_cleansheets = player_df.nlargest(1, 'Clean Sheets', keep='first') 
+    most_defensive_contributions = player_df.nlargest(1, 'Defensive Contributions', keep='first') 
+    return { 
+            'Total Points' : most_points, 
+            'Goals Scored' : most_goals, 
+            'Assists' : most_assists, 
+            'ICT Index' : top_ict, 
+            'Clean Sheets' : most_cleansheets, 
+            'Defensive Contributions' : most_defensive_contributions 
+            }
+
+def render_player_card(player_row, stat_label, stat_value):
+    """
+    Render a single player card with a modern and clean design.
+    """
+    player_name = player_row["Name"]
+    code = player_row["photo_code"]
+    photo_url = f"https://resources.premierleague.com/premierleague25/photos/players/110x140/{code}.png"
+
+    # --- Improved HTML & CSS ---
+    st.markdown(
+        f"""
+        <div style="
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #fff0f5;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+        ">
+            <img src="{photo_url}" style="
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                border: 3px solid #f0f0f0;
+                margin-bottom: 15px;
+                object-fit: cover;
+                object-position: 0 -5%;
+            "><br>
+            <strong style="
+                font-size: 1.1em;
+                font-weight: 600;
+                color: #333;
+                display: block;
+                margin-bottom: 5px;
+            ">{player_name}</strong>
+            <span style="font-size: 0.8em; color: #6a737d;">
+                {stat_label}: 
+                <span style="color: #000; font-weight: 700;">{stat_value}</span>
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
