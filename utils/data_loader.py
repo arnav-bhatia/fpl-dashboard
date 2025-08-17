@@ -457,7 +457,7 @@ def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd
     """
     cols = ['Name', 'Club', 'Price', 'Starts', 'Selected By (%)', 
             'Form', 'Value', 'Defensive Contribution', 
-            'Expected Goal Involvements', 'ICT Index', 
+            'Expected Goal Involvements', 'ICT Index', 'BPS',
             'ICT Index Rank Type', 'Assists', 'Goals Scored', 'Points']
     
     df =  (
