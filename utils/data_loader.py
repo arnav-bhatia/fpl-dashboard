@@ -264,15 +264,25 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
             "Away Team": away_team,
             "Away Team Difficulty": match.get('team_a_difficulty'),
             "Date": match.get('kickoff_time'),
-            "Score": f"{match.get('team_h_score', 0)} : {match.get('team_a_score', 0)}"
+            "Score": f"{match.get('team_h_score')} : {match.get('team_a_score')}"
         }
         fixtures.append(match_dict)
 
     fixtures_df = pd.DataFrame(fixtures)
+    fixtures_df.loc[fixtures_df['Score'] == 'None : None', 'Score'] = 'Yet to Happen'
     fixtures_df['Match Date'] = fixtures_df['Date'].apply(get_match_date)
     fixtures_df['Match Time (IST)'] = fixtures_df['Date'].apply(get_match_time)
     fixtures_df.drop('Date', axis=1, inplace=True)
-    return fixtures_df
+    
+    fixtures_col_defs = [
+        {"headerName": "GW", "field": "Gameweek", "flex": 1, "maxWidth": 70},
+        {"headerName": "Home Team", "field": "Home Team", "flex": 1.5, "minWidth": 100},
+        {"headerName": "Away Team", "field": "Away Team", "flex": 1.5, "minWidth": 100},
+        {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "Date", "field": "Match Date", "flex": 1, "minWidth": 70},
+        {"headerName": "Time (IST)", "field": "Match Time (IST)", "flex": 1, "minWidth": 70},
+    ]
+    return fixtures_df, fixtures_col_defs
 
 
 def create_team_fixtures_database(fixtures_df: pd.DataFrame, team_list: List[str]) -> Dict[str, pd.DataFrame]:
@@ -361,10 +371,11 @@ def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) ->
     return df, col_defs
 
 def return_top_players_form(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
+    player_database = player_database.copy()
+    player_database['Form'] = pd.to_numeric(player_database['Form'], errors='coerce')
+    
     cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 
             'Selected By (%)', 'Form', 'Value', 'PPG', 'Total Points']
-    st.dataframe(player_database)
-    
     df = (
         player_database[cols]
         .sort_values(by='Form', ascending=False)

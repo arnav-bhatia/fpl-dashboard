@@ -13,10 +13,13 @@ st.title('FPL Analyzer')
 @st.cache_data
 def load_all_data():
     player_json = utils.load_player_data()
+    fixtures_json = utils.load_fixtures_data()
     pl_teams_dict, pl_teams_list = utils.get_pl_teams_dict_and_list(player_json)
     position_dict = utils.get_position_dict()
     status_dict = utils.get_status_dict()
     player_df = utils.return_player_df(player_json, pl_teams_dict, status_dict, position_dict)
+    fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict)
+    fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     
     return {
         "player_json": player_json,
@@ -24,7 +27,10 @@ def load_all_data():
         "pl_teams_list": pl_teams_list,
         "position_dict": position_dict,
         "status_dict": status_dict,
-        "player_df": player_df
+        "player_df": player_df,
+        "fixtures_df": fixtures_df,
+        "fixture_col_defs": fixture_col_defs,
+        "fixtures_database": fixtures_database
     }
 
 if st.button("Refresh Data"):
@@ -39,6 +45,9 @@ pl_teams_list = data["pl_teams_list"]
 position_dict = data["position_dict"]
 status_dict = data["status_dict"]
 player_df = data["player_df"]
+fixtures_df = data["fixtures_df"]
+fixtures_database = data["fixtures_database"]
+fixture_col_defs = data["fixture_col_defs"]
 
 # Segment 1
 # st.subheader('Top Performers')
@@ -83,3 +92,12 @@ with topperformers2:
 utils.render_divider()
 
 utils.render_title_with_bg('Fixtures')
+
+utils.build_aggrid_table(fixtures_df, pagination=True, max_height=361, col_defs=fixture_col_defs)
+
+fixtures1, fixtures2 = st.columns(2)
+
+with fixtures1:
+    team_FDR = st.selectbox('Pick a team', options=pl_teams_list)
+    team_FDR_df = utils.get_team_fixtures(team_FDR, fixtures_database)
+    utils.build_aggrid_table(team_FDR_df, pagination=True, max_height=361)

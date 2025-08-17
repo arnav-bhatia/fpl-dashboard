@@ -3,9 +3,9 @@ import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 
-def build_aggrid_table(df, col_defs=None):
+def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000):
     gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_pagination(enabled=False)
+    gb.configure_pagination(enabled=pagination)
     gb.configure_default_column(resizable=True, filter=False, sortable=True)
 
     grid_options = gb.build()
@@ -41,7 +41,7 @@ def build_aggrid_table(df, col_defs=None):
     return AgGrid(
         df,
         gridOptions=grid_options,
-        height=340,
+        height=min(max_height, (1 + len(df.index)) * 31),
         allow_unsafe_jscode=True,
         custom_css=custom_css
     )
