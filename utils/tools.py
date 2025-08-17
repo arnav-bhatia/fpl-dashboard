@@ -20,9 +20,9 @@ def build_aggrid_table(df, col_defs=None):
     row_style = JsCode("""
         function(params) {
             if (params.node.rowIndex % 2 === 0) {
-                return {'background-color': '#ffc1c1', 'color': 'black'};
+                return {'background-color': '#FEC5F6', 'color': 'black'};
             } else {
-                return {'background-color': '#ffffff', 'color': 'black'};
+                return {'background-color': 'white', 'color': 'black'};
             }
         }
     """)
@@ -30,10 +30,11 @@ def build_aggrid_table(df, col_defs=None):
 
     custom_css = {
         ".ag-header-cell": {
-            "background-color": "#1976d2 !important",
+            "background-color": "#2A2A3A !important",
             "color": "white !important",
             "font-weight": "bold !important",
-            "text-align": "center"
+            "text-align": "center",
+            "border": "1px solid #FF2DD1"
         }
     }
 
@@ -58,11 +59,11 @@ def render_player_card(player_row, stat_label, stat_value):
         f"""
         <div style="
             font-family: 'Segoe UI', Roboto, sans-serif;
-            background: #fff0f5;
+            background: #2A2A3A;
             padding: 10px;
             border-radius: 15px;
             text-align: center;
-            border: 1px solid #e1e4e8;
+            border: 1px solid #FF2DD1;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             margin-top: 5px;
             margin-bottom: 15px;
@@ -71,28 +72,29 @@ def render_player_card(player_row, stat_label, stat_value):
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
-                border: 3px solid #f0f0f0;
+                border: 3px solid #FF2DD1;
                 margin-bottom: 2px;
                 object-fit: cover;
                 object-position: 0 -5%;
+                background-color: white;
             "><br>
             <strong style="
                 font-size: 1em;
                 font-weight: 600;
-                color: #333;
+                color: white;
                 display: block;
                 margin-bottom: 0;
             ">{player_name}</strong>
             <p style="
                 font-size: 0.9em;
                 font-weight: 400;
-                color: #333;
+                color: white;
                 display: block;
                 margin-bottom: 0;
             ">{team}</p>
-            <span style="font-size: 0.9em; color: #6a737d;">
+            <span style="font-size: 0.9em; color: white;">
                 {stat_label}: 
-                <span style="color: #000; font-weight: 700;">{stat_value}</span>
+                <span style="color: #FF2DD1; font-weight: 700;">{stat_value}</span>
             </span>
         </div>
         """,
@@ -106,17 +108,19 @@ def render_title_with_bg(title_text):
     st.markdown(
         f"""
         <div style="
-            padding: 1px; 
+            padding: 1px;
+            background-color: #2A2A3A;
             border-radius: 10px; 
             text-align: center; 
             margin-bottom: 10px;
-            border: 1px solid;
+            border: 1px solid #FF2DD1;
         ">
             <h2 style="
                 font-family: 'Segoe UI', Roboto, sans-serif; 
                 font-weight: 700;
                 font-size: 24px;
                 margin: 0;
+                color: white;
             ">{title_text}</h2>
         </div>
         """,
@@ -126,6 +130,6 @@ def render_title_with_bg(title_text):
 def render_divider():
     """Renders a thin, gray horizontal line with no vertical margins."""
     st.markdown(
-        """<hr style="height:1px; margin:0; border:none; background-color:white;" />""",
+        """<hr style="height:1px; margin:0; border:none; background-color:#FF2DD1;" />""",
         unsafe_allow_html=True
     )

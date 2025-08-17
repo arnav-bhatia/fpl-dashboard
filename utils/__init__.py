@@ -12,11 +12,13 @@ from .data_loader import (
     create_team_fixtures_database,
     get_team_fixtures,
     return_top_players_points,
+    return_top_players_form,
+    return_top_players_value,
     return_top_goalkeepers,
     return_top_defenders,
     return_top_midfielders,
     return_top_forwards,
-    get_top_stats_for_player_cards,
+    get_top_stats_for_player_cards
 )
 
 from .agstyler import (
@@ -47,6 +49,8 @@ __all__ = [
     "create_team_fixtures_database",
     "get_team_fixtures",
     "return_top_players_points",
+    "return_top_players_form",
+    "return_top_players_value",
     "return_top_goalkeepers",
     "return_top_defenders",
     "return_top_midfielders",

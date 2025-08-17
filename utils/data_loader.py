@@ -349,7 +349,7 @@ def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) ->
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
         {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
         {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
         {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
@@ -360,6 +360,62 @@ def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) ->
     
     return df, col_defs
 
+def return_top_players_form(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
+    cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 
+            'Selected By (%)', 'Form', 'Value', 'PPG', 'Total Points']
+    st.dataframe(player_database)
+    
+    df = (
+        player_database[cols]
+        .sort_values(by='Form', ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
+
+    # Define col_defs for AgGrid
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
+        {"headerName": "PPG", "field": "PPG", "flex": 1, "minWidth": 70},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},
+    ]
+    
+    return df, col_defs
+
+def return_top_players_value(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
+    cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 
+            'Selected By (%)', 'Form', 'Value', 'PPG', 'Total Points']
+    
+    df = (
+        player_database[cols]
+        .sort_values(by='Value', ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
+
+    # Define col_defs for AgGrid
+    col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
+        {"headerName": "Value", "field": "Value", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+        {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
+        {"headerName": "MP", "field": "Minutes Played", "flex": 1, "minWidth": 70},    
+        {"headerName": "PPG", "field": "PPG", "flex": 1, "minWidth": 70},
+        {"headerName": "BPS", "field": "BPS", "flex": 1, "minWidth": 70},
+    ]
+    
+    return df, col_defs
 
 def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd.DataFrame:
     """
@@ -387,7 +443,7 @@ def return_top_goalkeepers(player_database: pd.DataFrame, top_n: int = 10) -> pd
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
         {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
         {"headerName": "Saves", "field": "Saves", "flex": 1, "minWidth": 70},
         {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
@@ -427,7 +483,7 @@ def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.D
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
         {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
@@ -472,7 +528,7 @@ def return_top_midfielders(player_database: pd.DataFrame, top_n: int = 10) -> pd
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
         {"headerName": "DC", "field": "Defensive Contributions", "flex": 1, "minWidth": 70},
@@ -515,7 +571,7 @@ def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.Da
         {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
         {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
-        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": {"background-color": "#c5be80", "font-weight": "bold"}},
+        {"headerName": "Points", "field": "Total Points", "flex": 1, "minWidth": 70, "cellStyle": { "font-weight": "bold"}},
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "xGI", "field": "Expected Goal Involvements", "flex": 1, "minWidth": 70},
         {"headerName": "Assists", "field": "Assists", "flex": 1, "minWidth": 70},

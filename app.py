@@ -47,11 +47,15 @@ utils.render_title_with_bg('Top Performers')
 topperformers1, topperformers2 = st.columns(2)
 
 with topperformers1:
-    top_performers_options = ['Most Points', 'Best Goalkeepers', 'Best Defenders', 'Best Midfielders', 'Best Forwards']
+    top_performers_options = ['Most Points', 'Best Form', 'Best Value', 'Best Goalkeepers', 'Best Defenders', 'Best Midfielders', 'Best Forwards']
     choose_performer = st.selectbox('Select a category', top_performers_options)
-
+    
     if choose_performer == 'Most Points':
         display_df, coldefs = utils.return_top_players_points(player_df)
+    elif choose_performer == 'Best Form':
+        display_df, coldefs = utils.return_top_players_form(player_df)
+    elif choose_performer == 'Best Value':
+        display_df, coldefs = utils.return_top_players_value(player_df)
     elif choose_performer == 'Best Goalkeepers':
         display_df, coldefs = utils.return_top_goalkeepers(player_df)
     elif choose_performer == 'Best Defenders':
@@ -60,8 +64,9 @@ with topperformers1:
         display_df, coldefs = utils.return_top_midfielders(player_df)
     else:
         display_df, coldefs = utils.return_top_forwards(player_df)
-        
+
     utils.build_aggrid_table(display_df, col_defs=coldefs)
+    
 with topperformers2:
     player_cards_dict = utils.get_top_stats_for_player_cards(player_df)
     row1 = st.columns(3)
@@ -76,3 +81,5 @@ with topperformers2:
             utils.render_player_card(player_row, label, stat_value)
 
 utils.render_divider()
+
+utils.render_title_with_bg('Fixtures')
