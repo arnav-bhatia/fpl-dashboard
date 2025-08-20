@@ -123,7 +123,7 @@ def render_player_card(player_row, stat_label, stat_value):
         unsafe_allow_html=True
     )
     
-def render_title_with_bg(title_text):
+def render_title_with_bg(title_text, margin_top=0):
     """
     Renders a centered title with a light background and rounded corners.
     """
@@ -135,6 +135,7 @@ def render_title_with_bg(title_text):
             border-radius: 10px; 
             text-align: center; 
             margin-bottom: 10px;
+            margin-top: {margin_top}px;
             border: 1px solid #FF2DD1;
         ">
             <h2 style="
@@ -149,9 +150,101 @@ def render_title_with_bg(title_text):
         unsafe_allow_html=True
     )
     
+def render_subheaders(title_text, font_size=16, margin_top=1, margin_bottom=1):
+    """
+    Renders a centered title with a light background and rounded corners.
+    """
+    st.markdown(
+        f"""
+        <div style="
+            padding: 8px;
+            background-color: #2A2A3A;
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: {margin_bottom}px;
+            margin-top: {margin_top}px;
+            border: 1px solid #FF2DD1;
+        ">
+            <p style="
+                font-family: 'Segoe UI', Roboto, sans-serif; 
+                font-size: {font_size}px;
+                margin: 0;
+                color: white;
+            ">{title_text}</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
 def render_divider():
     """Renders a thin, gray horizontal line with no vertical margins."""
     st.markdown(
         """<hr style="height:1px; margin:0; border:none; background-color:#FF2DD1;" />""",
         unsafe_allow_html=True
     )
+    
+def fdr_metric(gw, gw_avg_fdr, rank):
+    color = "green" if rank <= 10 else "red"
+    st.metric(f"Average FDR for the next {gw} GWs", gw_avg_fdr, delta=f"PL Rank: {rank}", border=True)
+
+    st.markdown(
+        f"""
+        <style>
+        div[data-testid="stMetric"] {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #FF2DD1;
+            background: #2A2A3A;
+            border-radius: 10px
+            
+        }}
+
+        div[data-testid="stMetric"] label {{
+            text-align: center !important;
+            width: 100%;
+            display: block;
+        }}
+
+        div[data-testid="stMetricValue"] {{
+            text-align: center !important;
+        }}
+
+        [data-testid="stMetricDelta"] svg {{
+            display: none;
+        }}
+
+        [data-testid="stMetricDelta"] {{
+            color: {color} !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            display: flex;
+            justify-content: center;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+def style_fdr_section():
+    st.markdown(
+        f"""
+        <style>
+        div[data-testid="stSelectbox"] {{
+            padding: 1px;
+            border-radius: 10px; 
+            border: 1px solid #FF2DD1;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }}
+
+        div[class="stVerticalBlock st-emotion-cache-1w6c88t e6rk8up3"] {{
+            gap: 0;
+        }}
+        
+        div[class="stVerticalBlock st-emotion-cache-1jfqxor e6rk8up3"] {{
+            gap: 5px;
+        }}
+        </style>
+        """, unsafe_allow_html=True)

@@ -334,7 +334,7 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
     fixtures_df.drop('Date', axis=1, inplace=True)
     
     fixtures_col_defs = [
-        {"headerName": "GW", "field": "Gameweek", "flex": 1, "maxWidth": 70},
+        {"headerName": "GW", "field": "Gameweek", "flex": 1, "minWidth": 70},
         {"headerName": "Home Team", "field": "Home Team", "flex": 1.5, "minWidth": 100},
         {"headerName": "Away Team", "field": "Away Team", "flex": 1.5, "minWidth": 100},
         {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
@@ -411,16 +411,70 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
     team_df[cols_to_str] = team_df[cols_to_str].astype(str)
 
     col_defs = [
-        {"headerName": "GW", "field": "Game Week", "flex": 1, "maxWidth": 70},
+        {"headerName": "GW", "field": "Game Week", "flex": 1, "minWidth": 70},
         {"headerName": "Opponent", "field": "Opponent", "flex": 2, "minWidth": 160, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Venue", "field": "Venue", "flex": 1, "minWidth": 100},
-        {"headerName": "FDR", "field": "Fixture Difficulty Rating", "flex": 1, "maxWidth": 70, "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "FDR", "field": "Fixture Difficulty Rating", "flex": 1, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Date", "field": "Date", "flex": 1, "minWidth": 100},
         {"headerName": "Time (IST)", "field": "Time (IST)", "flex": 1, "minWidth": 100},
         {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 120},
     ]
 
     return team_df, col_defs
+
+def get_team_FDR_rating(team_fixtures_database, team_list):
+    arsenal_fixtures = team_fixtures_database['Arsenal']
+    aston_villa_fixtures = team_fixtures_database['Aston Villa']
+    team_fdr_rating_list = []
+    for team in team_list:
+        if team != 'Arsenal':
+            match_away = arsenal_fixtures[(arsenal_fixtures['Opponent']==team) & (arsenal_fixtures['Venue']=='Away')]
+            match_home = arsenal_fixtures[(arsenal_fixtures['Opponent']==team) & (arsenal_fixtures['Venue']=='Home')]
+            team_fdr_rating = {
+                'Team': match_home['Opponent'].iloc[0],
+                'Home FDR': match_home['Fixture Difficulty Rating'].iloc[0],
+                'Away FDR': match_away['Fixture Difficulty Rating'].iloc[0]
+            }
+            team_fdr_rating_list.append(team_fdr_rating)
+        else:
+            match_away = aston_villa_fixtures[(aston_villa_fixtures['Opponent']=='Arsenal') & (aston_villa_fixtures['Venue']=='Away')]
+            match_home = aston_villa_fixtures[(aston_villa_fixtures['Opponent']=='Arsenal') & (aston_villa_fixtures['Venue']=='Home')]
+            team_fdr_rating = {
+                'Team': match_home['Opponent'].iloc[0],
+                'Home FDR': match_home['Fixture Difficulty Rating'].iloc[0],
+                'Away FDR': match_away['Fixture Difficulty Rating'].iloc[0]
+            }
+            team_fdr_rating_list.append(team_fdr_rating)
+    team_fdr_rating_df = pd.DataFrame(team_fdr_rating_list)
+    return team_fdr_rating_df
+            
+def create_team_fdr_database(team_fixtures_database):
+    fdr_list = []
+    for team in team_fixtures_database:
+        df = team_fixtures_database[team]
+        df = df[df['Score'] == 'Yet to Happen']
+        df['Fixture Difficulty Rating'] = df['Fixture Difficulty Rating'].apply(pd.to_numeric)
+        avg_5 = round(df.head(5)['Fixture Difficulty Rating'].mean(), 2)
+        avg_10 = round(df.head(10)['Fixture Difficulty Rating'].mean(), 2)
+        team_fdr_avg = {
+            'Team' : team,
+            '5 GW FDR Avg' : avg_5,
+            '10 GW FDR Avg' : avg_10
+        }
+        fdr_list.append(team_fdr_avg)
+    
+    fdr_avg_df = pd.DataFrame(fdr_list)
+    fdr_avg_df = fdr_avg_df.sort_values(by='5 GW FDR Avg')
+    fdr_avg_df = fdr_avg_df.reset_index(drop=True)
+    fdr_avg_df.index = range(1, 21)
+    
+    col_defs = [
+        {"headerName": "Club", "field": "Team", "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "5 GW Avg", "field": "5 GW FDR Avg"},
+        {"headerName": "10 GW Avg", "field": "10 GW FDR Avg"},
+    ]
+    
+    return fdr_avg_df, col_defs
 
 def return_top_players_points(player_database: pd.DataFrame, top_n: int = 10) -> tuple:
     cols = ['Name', 'Club', 'Position', 'Price', 'Minutes Played', 'BPS', 

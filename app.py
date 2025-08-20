@@ -20,6 +20,9 @@ def load_all_data():
     player_df = utils.return_player_df(player_json, pl_teams_dict, status_dict, position_dict)
     fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict, player_df)
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
+    fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
+    team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
+
     
     return {
         "player_json": player_json,
@@ -30,7 +33,11 @@ def load_all_data():
         "player_df": player_df,
         "fixtures_df": fixtures_df,
         "fixture_col_defs": fixture_col_defs,
-        "fixtures_database": fixtures_database
+        "fixtures_database": fixtures_database,
+        "fdr_database": fdr_database,
+        "fdr_avg_coldefs": fdr_avg_coldefs,
+        "team_fdr_rating_df": team_fdr_rating_df
+        
     }
 
 if st.button("Refresh Data"):
@@ -48,6 +55,9 @@ player_df = data["player_df"]
 fixtures_df = data["fixtures_df"]
 fixtures_database = data["fixtures_database"]
 fixture_col_defs = data["fixture_col_defs"]
+fdr_database = data["fdr_database"]
+fdr_avg_coldefs = data["fdr_avg_coldefs"]
+team_fdr_rating_df = data["team_fdr_rating_df"]
 
 # Segment 1
 # st.subheader('Top Performers')
@@ -95,9 +105,36 @@ utils.render_title_with_bg('Fixtures and Results')
 
 utils.build_aggrid_table(fixtures_df, pagination=True, max_height=370, col_defs=fixture_col_defs)
 
-fixtures1, fixtures2 = st.columns([1.3, 1.7])
+utils.render_divider()
+
+utils.render_title_with_bg('Fixture Difficulty Rating')
+
+fixtures1, fixtures2, fixtures3 = st.columns([1, 2, 1])
 
 with fixtures1:
-    team_FDR = st.selectbox('Pick a team', options=pl_teams_list)
+    utils.render_subheaders('Teams with lowest FDR', margin_top=5, margin_bottom=17)
+    utils.build_aggrid_table(fdr_database, pagination=True, max_height=370, col_defs=fdr_avg_coldefs)
+    
+with fixtures2:
+    team_FDR = st.selectbox('Empty', options=pl_teams_list, placeholder='Choose a team', label_visibility='collapsed')
+    utils.style_fdr_section()
     team_FDR_df, fdr_coldefs = utils.get_team_fixtures(team_FDR, fixtures_database)
     utils.build_aggrid_table(team_FDR_df, pagination=True, max_height=370, col_defs=fdr_coldefs, alt_row_colours=False, FDR=True)
+    
+with fixtures3:
+    utils.render_subheaders(f"{team_FDR}'s FDR Metrics", margin_top=5, margin_bottom=17)
+    fdr_home, fdr_away = st.columns(2)
+    with fdr_home:
+        home_value = team_fdr_rating_df[team_fdr_rating_df['Team']==team_FDR]['Home FDR'].iloc[0]
+        st.metric(f'{team_FDR} at Home', home_value)
+    with fdr_away:
+        away_value = team_fdr_rating_df[team_fdr_rating_df['Team']==team_FDR]['Away FDR'].iloc[0]
+        st.metric(f'{team_FDR} Away', away_value)
+    team_5gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].iloc[0]
+    team_10gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].iloc[0]
+    team_5gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].index[0])
+    team_10gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].index[0])
+    utils.fdr_metric(5, team_5gw_avg_fdr, team_5gw_rank)
+    utils.fdr_metric(10, team_10gw_avg_fdr, team_10gw_rank)
+
+utils.render_divider()

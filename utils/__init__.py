@@ -11,6 +11,8 @@ from .data_loader import (
     return_fixtures_df,
     create_team_fixtures_database,
     get_team_fixtures,
+    create_team_fdr_database,
+    get_team_FDR_rating,
     return_top_players_points,
     return_top_players_form,
     return_top_players_value,
@@ -31,8 +33,10 @@ from  .tools import(
     build_aggrid_table,
     render_player_card,
     render_title_with_bg,
-    render_divider
-
+    render_subheaders,
+    render_divider,
+    fdr_metric,
+    style_fdr_section
 )
 
 __all__ = [
@@ -48,6 +52,7 @@ __all__ = [
     "return_fixtures_df",
     "create_team_fixtures_database",
     "get_team_fixtures",
+    "create_team_fdr_database",
     "return_top_players_points",
     "return_top_players_form",
     "return_top_players_value",
@@ -62,5 +67,8 @@ __all__ = [
     "get_top_stats_for_player_cards",
     "render_player_card",
     "render_title_with_bg",
-    "render_divider"
-]
+    "render_subheaders",
+    "render_divider",
+    "fdr_metric",
+    "style_fdr_section",
+    "get_team_FDR_rating"]
