@@ -343,7 +343,7 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
         {"headerName": "Away Scorers", "field": "Away Team Scorers", "flex": 2, "minWidth": 100},
         {"headerName": "Home Assisters", "field": "Home Team Assisters", "flex": 2, "minWidth": 100},
         {"headerName": "Away Assisters", "field": "Away Team Assisters", "flex": 2, "minWidth": 100},
-        {"headerName": "Bonus Points", "field": "Bonus Points", "flex": 2, "minWidth": 100},
+        {"headerName": "Bonus Points", "field": "Bonus Points", "flex": 2, "minWidth": 140},
     ]
 
     return fixtures_df, fixtures_col_defs
@@ -469,9 +469,9 @@ def create_team_fdr_database(team_fixtures_database):
     fdr_avg_df.index = range(1, 21)
     
     col_defs = [
-        {"headerName": "Club", "field": "Team", "cellStyle": {"font-weight": "bold"}},
-        {"headerName": "5 GW Avg", "field": "5 GW FDR Avg"},
-        {"headerName": "10 GW Avg", "field": "10 GW FDR Avg"},
+        {"headerName": "Club", "field": "Team", "flex": 2, "minWidth": 140, "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "5 Gameweek Avg", "field": "5 GW FDR Avg", "flex": 1, "minWidth": 100},
+        {"headerName": "10 Gameweek Avg", "field": "10 GW FDR Avg", "flex": 1, "minWidth": 100},
     ]
     
     return fdr_avg_df, col_defs

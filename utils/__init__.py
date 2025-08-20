@@ -35,8 +35,8 @@ from  .tools import(
     render_title_with_bg,
     render_subheaders,
     render_divider,
-    fdr_metric,
-    style_fdr_section
+    calc_fdr_delta_colour,
+    map_fdr_colour
 )
 
 __all__ = [
@@ -69,6 +69,6 @@ __all__ = [
     "render_title_with_bg",
     "render_subheaders",
     "render_divider",
-    "fdr_metric",
-    "style_fdr_section",
-    "get_team_FDR_rating"]
+    "calc_fdr_delta_colour",
+    "get_team_FDR_rating",
+    "map_fdr_colour"]

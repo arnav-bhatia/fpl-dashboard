@@ -183,49 +183,23 @@ def render_divider():
         unsafe_allow_html=True
     )
     
-def fdr_metric(gw, gw_avg_fdr, rank):
-    color = "green" if rank <= 10 else "red"
-    st.metric(f"Average FDR for the next {gw} GWs", gw_avg_fdr, delta=f"PL Rank: {rank}", border=True)
-
-    st.markdown(
-        f"""
-        <style>
-        div[data-testid="stMetric"] {{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #FF2DD1;
-            background: #2A2A3A;
-            border-radius: 10px
-            
-        }}
-
-        div[data-testid="stMetric"] label {{
-            text-align: center !important;
-            width: 100%;
-            display: block;
-        }}
-
-        div[data-testid="stMetricValue"] {{
-            text-align: center !important;
-        }}
-
-        [data-testid="stMetricDelta"] svg {{
-            display: none;
-        }}
-
-        [data-testid="stMetricDelta"] {{
-            color: {color} !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            display: flex;
-            justify-content: center;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+def calc_fdr_delta_colour(rank):
+    if rank < 7:
+        return "normal"
+    elif rank < 15:  
+        return "off"
+    else:
+        return "inverse"
+    
+def map_fdr_colour(fdr):
+    if fdr == 2:
+        return "fdr-two"
+    elif fdr == 3:
+        return "fdr-three"
+    elif fdr == 4:
+        return "fdr-four"
+    elif fdr == 5:
+        return "fdr-five"
     
 def style_fdr_section():
     st.markdown(
@@ -239,11 +213,11 @@ def style_fdr_section():
             margin-bottom: 5px;
         }}
 
-        div[class="stVerticalBlock st-emotion-cache-1w6c88t e6rk8up3"] {{
+        div[class="stVerticalBlock st-emotion-cache-159b5ki eceldm42"] {{
             gap: 0;
         }}
         
-        div[class="stVerticalBlock st-emotion-cache-1jfqxor e6rk8up3"] {{
+        div[class="stVerticalBlock st-emotion-cache-159b5ki eceldm42"] {{
             gap: 5px;
         }}
         </style>
