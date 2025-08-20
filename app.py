@@ -159,5 +159,3 @@ with fixtures3:
         st.metric(f"Average FDR for the next 10 GWs", team_10gw_avg_fdr, delta=f"PL Rank: {team_10gw_rank}", delta_color=delta_colour_5, border=True)
 
 utils.render_divider()
-
-#anodogrefgwgwgregrnrtntrhehrjrjegerhergegehey4y45e
