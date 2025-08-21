@@ -37,94 +37,74 @@
     justify-content: center;
 }
 
-.st-key-metric-flex {
-    display: flex;
-    flex-direction: row;       
-    align-items: center;       
-    justify-content: center;  
-    gap: 1.5rem;
-    height: 85px;
-        
-}
-
-.st-key-fdr-one [data-testid="stMetric"] {
+/* FDR 1 Styling */
+[class*="st-key-fdr-one"] [data-testid="stMetric"] {
     background-color: #364725;
-    height: 92px;
     border-radius: 10px; 
 }
-
-.st-key-fdr-one [data-testid="stMetric"] label{
+[class*="st-key-fdr-one"] [data-testid="stMetric"] label {
     text-align: center !important;
     width: 100%;
     display: block;
 }
-
-.st-key-fdr-one [data-testid="stMetricValue"]{
+[class*="st-key-fdr-one"] [data-testid="stMetricValue"] {
     text-align: center !important;
 }
 
-.st-key-fdr-two [data-testid="stMetric"] {
+/* FDR 2 Styling */
+[class*="st-key-fdr-two"] [data-testid="stMetric"] {
     background-color: #07f978;
-    height: 92px;
     border-radius: 10px; 
 }
-
-.st-key-fdr-two div[data-testid="stMetric"] label{
+[class*="st-key-fdr-two"] [data-testid="stMetric"] label {
     text-align: center !important;
     width: 100%;
     display: block;
 }
-
-.st-key-fdr-two div[data-testid="stMetricValue"]{
+[class*="st-key-fdr-two"] [data-testid="stMetricValue"] {
     text-align: center !important;
 }
 
-.st-key-fdr-three [data-testid="stMetric"] {
+/* FDR 3 Styling */
+[class*="st-key-fdr-three"] [data-testid="stMetric"] {
     background-color: #DDDDDD;
-    height: 92px;
     border-radius: 10px; 
 }
-
-.st-key-fdr-three div[data-testid="stMetric"] label{
+[class*="st-key-fdr-three"] [data-testid="stMetric"] label {
     color: black;
     text-align: center !important;
     width: 100%;
     display: block;
 }
-
-.st-key-fdr-three div[data-testid="stMetricValue"]{
+[class*="st-key-fdr-three"] [data-testid="stMetricValue"] {
     color: black;
     text-align: center !important;
 }
 
-.st-key-fdr-four [data-testid="stMetric"]{
+/* FDR 4 Styling */
+[class*="st-key-fdr-four"] [data-testid="stMetric"] {
     background-color: #f91952;
-    height: 92px;
     border-radius: 10px; 
 }
-
-.st-key-fdr-four div[data-testid="stMetric"] label{
+[class*="st-key-fdr-four"] [data-testid="stMetric"] label {
     text-align: center !important;
     width: 100%;
     display: block;
 }
-
-.st-key-fdr-four div[data-testid="stMetricValue"]{
+[class*="st-key-fdr-four"] [data-testid="stMetricValue"] {
     text-align: center !important;
 }
 
-.st-key-fdr-five [data-testid="stMetric"] {
+/* FDR 5 Styling */
+[class*="st-key-fdr-five"] [data-testid="stMetric"] {
     background-color: #800a30;
-    height: 92px;
     border-radius: 10px; 
 }
-
-.st-key-fdr-five div[data-testid="stMetric"] label{
+[class*="st-key-fdr-five"] [data-testid="stMetric"] label {
     text-align: center !important;
     width: 100%;
     display: block;
 }
-
-.st-key-fdr-five div[data-testid="stMetricValue"]{
+[class*="st-key-fdr-five"] [data-testid="stMetricValue"] {
     text-align: center !important;
 }

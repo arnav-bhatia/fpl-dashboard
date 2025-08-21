@@ -133,29 +133,34 @@ with fixtures2:
     
 with fixtures3:
     utils.render_subheaders(f"{team_FDR}'s FDR Metrics", margin_top=5, margin_bottom=17)
-    home_value = team_fdr_rating_df[team_fdr_rating_df['Team']==team_FDR]['Home FDR'].iloc[0]
-    away_value = team_fdr_rating_df[team_fdr_rating_df['Team']==team_FDR]['Away FDR'].iloc[0]
-    fdr_home_key = utils.map_fdr_colour(home_value)
-    fdr_away_key = utils.map_fdr_colour(away_value)
-    if fdr_home_key == fdr_away_key:
-        with st.container(key=fdr_home_key):
-                with st.container(key="metric-flex"):
-                    st.metric(f'{team_FDR} at Home', home_value, border=True)
-                    st.metric(f'{team_FDR} Away', away_value, border=True)
-    else:
-        with st.container(key="metric-flex"):
-            with st.container(key=fdr_home_key):
-                    st.metric(f'{team_FDR} at Home', home_value, border=True)
-            with st.container(key=fdr_away_key):
-                    st.metric(f'{team_FDR} Away', away_value, border=True)
-    team_5gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].iloc[0]
-    team_10gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].iloc[0]
-    team_5gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].index[0])
-    team_10gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].index[0])
+    home_value = team_fdr_rating_df[team_fdr_rating_df['Team'] == team_FDR]['Home FDR'].iloc[0]
+    away_value = team_fdr_rating_df[team_fdr_rating_df['Team'] == team_FDR]['Away FDR'].iloc[0]
+    
+    fdr_home_base_key = utils.map_fdr_colour(home_value)
+    fdr_away_base_key = utils.map_fdr_colour(away_value)
+
+    unique_home_key = f"{fdr_home_base_key}_home"
+    unique_away_key = f"{fdr_away_base_key}_away"
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        with st.container(key=unique_home_key):
+            st.metric(f'{team_FDR} at Home', home_value, border=True)
+
+    with col2:
+        with st.container(key=unique_away_key):
+            st.metric(f'{team_FDR} Away', away_value, border=True)
     with st.container(key="fdr-metric"):
+        team_5gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].iloc[0]
+        team_10gw_avg_fdr = fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].iloc[0]
+        team_5gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['5 GW FDR Avg'].index[0])
+        team_10gw_rank = int(fdr_database[fdr_database['Team']==team_FDR]['10 GW FDR Avg'].index[0])
         delta_colour_5 = utils.calc_fdr_delta_colour(team_5gw_rank)
         delta_colour_10 = utils.calc_fdr_delta_colour(team_10gw_rank)
         st.metric(f"Average FDR for the next 5 GWs", team_5gw_avg_fdr, delta=f"PL Rank: {team_5gw_rank}", delta_color=delta_colour_5, border=True)
         st.metric(f"Average FDR for the next 10 GWs", team_10gw_avg_fdr, delta=f"PL Rank: {team_10gw_rank}", delta_color=delta_colour_5, border=True)
 
 utils.render_divider()
+
+#PL Table
