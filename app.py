@@ -30,6 +30,8 @@ def load_all_data():
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
     team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
     pl_table_df, pl_table_col_defs = utils.build_pl_table(pl_teams_list, fixtures_database, utils.get_team_fixtures)
+    club_logos = utils.load_club_logos("assets/Club Logos")
+    pl_table_df["Logo"] = pl_table_df["Team"].map(club_logos).fillna("")
     
     return {
         "player_json": player_json,
@@ -45,7 +47,8 @@ def load_all_data():
         "fdr_avg_coldefs": fdr_avg_coldefs,
         "team_fdr_rating_df": team_fdr_rating_df,
         "pl_table_df" : pl_table_df,
-        "pl_table_col_defs" : pl_table_col_defs
+        "pl_table_col_defs" : pl_table_col_defs,
+        "club_logos" : club_logos
     }
 
 if st.button("Refresh Data"):

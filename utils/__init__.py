@@ -1,4 +1,6 @@
 from .data_loader import (
+    _svg_to_data_uri,
+    load_club_logos,
     load_player_data,
     load_fixtures_data,
     get_pl_teams_dict_and_list,
@@ -41,6 +43,8 @@ from  .tools import(
 )
 
 __all__ = [
+    "_svg_to_data_uri",
+    "load_club_logos",
     "load_player_data",
     "load_fixtures_data",
     "get_pl_teams_dict_and_list",

@@ -5,8 +5,28 @@ import pandas as pd
 from datetime import datetime
 import requests
 import pytz
+import base64
+from pathlib import Path
 
-# Loading data from FPL API
+def _svg_to_data_uri(svg_path: Path) -> str:
+    data = svg_path.read_bytes()
+    b64 = base64.b64encode(data).decode("utf-8")
+    return f"data:image/svg+xml;base64,{b64}"
+
+def load_club_logos(assets_dir: str | Path) -> dict:
+    """
+    Returns a dict: Team Name -> data URI for its SVG logo.
+    Expects files named exactly like team names, e.g. 'Arsenal.svg'.
+    """
+    assets_dir = Path(assets_dir)
+    logo_map = {}
+    for svg_file in assets_dir.glob("*.svg"):
+        team_name = svg_file.stem  # 'Arsenal' from 'Arsenal.svg'
+        try:
+            logo_map[team_name] = _svg_to_data_uri(svg_file)
+        except Exception:
+            logo_map[team_name] = None
+    return logo_map
 
 def load_player_data(PLAYER_URL: str = "https://fantasy.premierleague.com/api/bootstrap-static/") -> Dict[str, Any]:
     """
@@ -469,6 +489,29 @@ def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
         """
     )
 
+    logo_renderer = JsCode(
+        """
+    function(params) {
+    if (!params.value) return '';
+    return `<img src="${params.value}" style="height:24px;width:24px;display:block;margin:auto" />`;
+    }
+    """
+    )
+
+    team_renderer = JsCode(
+        """
+    function(params) {
+    const logo = params.data && params.data.Logo ? params.data.Logo : '';
+    const name = params.value || '';
+    return `
+        <div style="display:flex;align-items:center;gap:8px;">
+        ${logo ? `<img src="${logo}" style="height:20px;width:20px;"/>` : ''}
+        <span>${name}</span>
+        </div>`;
+    }
+    """
+        )
+
     def result_checker(scored, conceded):
         if scored > conceded:
             return 3, "Wins"
@@ -526,12 +569,13 @@ def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
     )
 
     pl_table_df.insert(0, 'Position', range(1, 21))
-    
+
     default_style = {"backgroundColor": "#41054b", "color": "white"}
 
     pl_table_col_defs = [
         {"headerName": "P", "field": "Position", "flex": 1, "maxWidth": 50, "pinned": "left", "cellStyle": position_style},
         {"headerName": "Team", "field": "Team", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "backgroundColor": "#41054b", "color": "white", "text-transform": "uppercase"}},
+        # {"headerName": "Team", "field": "Team", "flex": 2, "minWidth": 140, "pinned": "left", "cellRenderer": team_renderer, "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
         {"headerName": "Matches", "field": "Matches Played", "flex": 1, "minWidth": 70, "cellStyle": default_style},
         {"headerName": "Wins", "field": "Wins", "flex": 1, "minWidth": 70, "cellStyle": default_style},
         {"headerName": "Draws", "field": "Draws", "flex": 1, "minWidth": 70, "cellStyle": default_style},
