@@ -29,7 +29,7 @@ def load_all_data():
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
     team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
-
+    pl_table_df = utils.build_pl_table(pl_teams_list, fixtures_database, utils.get_team_fixtures)
     
     return {
         "player_json": player_json,
@@ -43,8 +43,8 @@ def load_all_data():
         "fixtures_database": fixtures_database,
         "fdr_database": fdr_database,
         "fdr_avg_coldefs": fdr_avg_coldefs,
-        "team_fdr_rating_df": team_fdr_rating_df
-        
+        "team_fdr_rating_df": team_fdr_rating_df,
+        "pl_table_df" : pl_table_df
     }
 
 if st.button("Refresh Data"):
@@ -65,6 +65,7 @@ fixture_col_defs = data["fixture_col_defs"]
 fdr_database = data["fdr_database"]
 fdr_avg_coldefs = data["fdr_avg_coldefs"]
 team_fdr_rating_df = data["team_fdr_rating_df"]
+pl_table_df = data["pl_table_df"]
 
 utils.render_title_with_bg('Top Performers')
 
@@ -163,4 +164,6 @@ with fixtures3:
 
 utils.render_divider()
 
-#PL Table
+utils.render_title_with_bg('Premier League Table')
+
+utils.build_aggrid_table(pl_table_df)

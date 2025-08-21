@@ -422,6 +422,84 @@ def get_team_fixtures(team: str, team_fixtures_database: Dict[str, pd.DataFrame]
 
     return team_df, col_defs
 
+def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
+    """
+    Build a Premier League-style table from fixtures data.
+
+    Parameters
+    ----------
+    pl_teams_list : list
+        List of team names.
+    fixtures_database : pd.DataFrame
+        The complete fixtures dataset.
+    get_team_fixtures : function
+        A function that returns (team_fixt, other_data) when given (team, fixtures_database).
+
+    Returns
+    -------
+    pd.DataFrame
+        League table sorted by Points and Goal Difference.
+    """
+
+    def result_checker(scored, conceded):
+        if scored > conceded:
+            return 3, "Wins"
+        elif scored < conceded:
+            return 0, "Losses"
+        else:
+            return 1, "Draws"
+
+    pl_table_list = []
+
+    for team in pl_teams_list:
+        team_fixt, _ = get_team_fixtures(team, fixtures_database)
+        team_fixt = team_fixt.set_index('Game Week')
+        team_fixt.index = team_fixt.index.astype(str)
+
+        team_dict = {
+            'Team': team,
+            'Matches Played': 0,
+            'Wins': 0,
+            'Draws': 0,
+            'Losses': 0,
+            'Goals Scored': 0,
+            'Goals Conceded': 0,
+            'Points': 0,
+            'Goal Difference': 0,
+        }
+
+        for i, (gw, match) in enumerate(team_fixt.iterrows(), start=1):
+            if match['Score'] == "Yet to Happen":
+                continue
+
+            score = match["Score"]
+            venue = match["Venue"]
+
+            if venue == "Away":
+                goals_scored, goals_conceded = int(score[4]), int(score[0])
+            else:
+                goals_scored, goals_conceded = int(score[0]), int(score[4])
+
+            team_dict['Matches Played'] = i
+            team_dict['Goals Scored'] += goals_scored
+            team_dict['Goals Conceded'] += goals_conceded
+            team_dict['Goal Difference'] += (goals_scored - goals_conceded)
+
+            points, result = result_checker(goals_scored, goals_conceded)
+            team_dict[result] += 1
+            team_dict['Points'] += points
+
+        pl_table_list.append(team_dict)
+
+    pl_table_df = (
+        pd.DataFrame(pl_table_list)
+          .sort_values(by=['Points', 'Goal Difference'], ascending=False)
+          .reset_index(drop=True)
+    )
+    pl_table_df.index = pl_table_df.index + 1
+
+    return pl_table_df
+
 def get_team_FDR_rating(team_fixtures_database, team_list):
     arsenal_fixtures = team_fixtures_database['Arsenal']
     aston_villa_fixtures = team_fixtures_database['Aston Villa']
