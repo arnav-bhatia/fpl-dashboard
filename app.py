@@ -29,7 +29,7 @@ def load_all_data():
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
     team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
-    pl_table_df = utils.build_pl_table(pl_teams_list, fixtures_database, utils.get_team_fixtures)
+    pl_table_df, pl_table_col_defs = utils.build_pl_table(pl_teams_list, fixtures_database, utils.get_team_fixtures)
     
     return {
         "player_json": player_json,
@@ -44,7 +44,8 @@ def load_all_data():
         "fdr_database": fdr_database,
         "fdr_avg_coldefs": fdr_avg_coldefs,
         "team_fdr_rating_df": team_fdr_rating_df,
-        "pl_table_df" : pl_table_df
+        "pl_table_df" : pl_table_df,
+        "pl_table_col_defs" : pl_table_col_defs
     }
 
 if st.button("Refresh Data"):
@@ -66,6 +67,7 @@ fdr_database = data["fdr_database"]
 fdr_avg_coldefs = data["fdr_avg_coldefs"]
 team_fdr_rating_df = data["team_fdr_rating_df"]
 pl_table_df = data["pl_table_df"]
+pl_table_col_defs = data["pl_table_col_defs"]
 
 utils.render_title_with_bg('Top Performers')
 
@@ -107,9 +109,17 @@ with topperformers2:
 
 utils.render_divider()
 
-utils.render_title_with_bg('Fixtures and Results')
+utils.render_title_with_bg('Premier League - 2025/26')
 
-utils.build_aggrid_table(fixtures_df, pagination=True, max_height=370, col_defs=fixture_col_defs)
+pl_table, pl_fixtures = st.columns(2)
+
+with pl_table:
+    utils.render_subheaders('Table', margin_top=5, margin_bottom=5)
+    utils.build_aggrid_table(pl_table_df, col_defs=pl_table_col_defs, pagination=True, max_height=370, alt_row_colours=False)
+
+with pl_fixtures:
+    utils.render_subheaders('Fixtures', margin_top=5, margin_bottom=5)
+    utils.build_aggrid_table(fixtures_df, pagination=True, max_height=370, col_defs=fixture_col_defs)
 
 utils.render_divider()
 
@@ -163,7 +173,3 @@ with fixtures3:
         st.metric(f"Average FDR for the next 10 GWs", team_10gw_avg_fdr, delta=f"PL Rank: {team_10gw_rank}", delta_color=delta_colour_5, border=True)
 
 utils.render_divider()
-
-utils.render_title_with_bg('Premier League Table')
-
-utils.build_aggrid_table(pl_table_df)

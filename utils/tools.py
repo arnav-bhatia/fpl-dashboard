@@ -2,20 +2,27 @@ import pandas as pd
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
-def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000, alt_row_colours=True, FDR=False):
+def build_aggrid_table(
+    df, 
+    col_defs=None, 
+    pagination=False, 
+    max_height=1000, 
+    alt_row_colours=True, 
+    FDR=False
+):
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_pagination(enabled=pagination)
     gb.configure_default_column(resizable=True, filter=False, sortable=True)
 
     grid_options = gb.build()
 
-    # Apply custom column defs if provided
     if col_defs:
         grid_options["columnDefs"] = col_defs
     else:
         grid_options["autoSizeStrategy"] = {"type": "fitCellContents"}
 
-    if alt_row_colours:
+    # Default alternating colors
+    if alt_row_colours and not (FDR):
         row_style = JsCode("""
             function(params) {
                 if (params.node.rowIndex % 2 === 0) {
@@ -26,7 +33,8 @@ def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000, alt
             }
         """)
         grid_options["getRowStyle"] = row_style
-    
+
+    # FDR coloring
     elif FDR:
         row_style = JsCode(f"""
             function(params) {{
@@ -35,20 +43,46 @@ def build_aggrid_table(df, col_defs=None, pagination=False, max_height=1000, alt
                 if (!m) return null;
                 var fdr = parseInt(m[0], 10);
 
-                // FPL-ish palette
                 var bg = null, color = null;
-                if (fdr === 1) {{ bg = '#364725'; color = 'white'; }}       // green
+                if (fdr === 1) {{ bg = '#364725'; color = 'white'; }}       // dark green
                 else if (fdr === 2) {{ bg = '#07f978'; color = 'black'; }}  // light green
                 else if (fdr === 3) {{ bg = '#DDDDDD'; color = 'black'; }}  // grey
                 else if (fdr === 4) {{ bg = '#f91952'; color = 'white'; }}  // light red
-                else if (fdr === 5) {{ bg = '#800a30'; color = 'white'; }}  // red
+                else if (fdr === 5) {{ bg = '#800a30'; color = 'white'; }}  // dark red
 
                 if (bg) return {{ 'background-color': bg, 'color': color }};
                 return null;
             }}
         """)
-
         grid_options["getRowStyle"] = row_style
+
+    # Premier League table coloring
+    # elif pl_table:
+    #     row_style = JsCode(f"""
+    #         function(params) {{
+    #             var pos = parseInt(params.data["Position"], 10);
+    #             if (isNaN(pos)) return null;
+
+    #             var bg = null, color = "white";
+    #             if (pos === 1) {{
+    #                 bg = "#ffbf00"; color = "white";       // Champions
+    #             }} else if (pos >= 2 && pos <= 5) {{
+    #                 bg = "#3bb552";                     // CL spots (blue)
+    #             }} else if (pos === 6) {{
+    #                 bg = "#288eea";                      // Europa League
+    #             }} else if (pos === 7) {{
+    #                 bg = "#0ad8d8";                       // Conference League
+    #             }} else if (pos >= 18 && pos <= 20) {{
+    #                 bg = "red";                         // Relegation
+    #             }} else {{
+    #                 bg = "#41054b";
+    #             }}
+
+    #             if (bg) return {{ 'background-color': bg, 'color': color }};
+    #             return null;
+    #         }}
+    #     """)
+    #     grid_options["getRowStyle"] = row_style
 
     custom_css = {
         ".ag-header-cell": {

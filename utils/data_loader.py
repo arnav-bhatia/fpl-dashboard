@@ -441,6 +441,34 @@ def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
         League table sorted by Points and Goal Difference.
     """
 
+    position_style = JsCode(
+        f"""
+            function(params) {{
+                var pos = parseInt(params.data["Position"], 10);
+                if (isNaN(pos)) return null;
+
+                var bg = null, color = "white";
+
+                if (pos === 1) {{
+                    bg = "#ffbf00"; color = "white";       // Champions
+                }} else if (pos >= 2 && pos <= 5) {{
+                    bg = "#3bb552";                     // CL spots (blue)
+                }} else if (pos === 6) {{
+                    bg = "#288eea";                      // Europa League
+                }} else if (pos === 7) {{
+                    bg = "#0ad8d8";                       // Conference League
+                }} else if (pos >= 18 && pos <= 20) {{
+                    bg = "red";                         // Relegation
+                }} else {{
+                    bg = "#41054b";
+                }}
+                
+                if (bg) return {{ 'background-color': bg, 'color': color }};
+                return null;
+            }}
+        """
+    )
+
     def result_checker(scored, conceded):
         if scored > conceded:
             return 3, "Wins"
@@ -496,9 +524,25 @@ def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
           .sort_values(by=['Points', 'Goal Difference'], ascending=False)
           .reset_index(drop=True)
     )
-    pl_table_df.index = pl_table_df.index + 1
 
-    return pl_table_df
+    pl_table_df.insert(0, 'Position', range(1, 21))
+    
+    default_style = {"backgroundColor": "#41054b", "color": "white"}
+
+    pl_table_col_defs = [
+        {"headerName": "P", "field": "Position", "flex": 1, "maxWidth": 50, "pinned": "left", "cellStyle": position_style},
+        {"headerName": "Team", "field": "Team", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "backgroundColor": "#41054b", "color": "white", "text-transform": "uppercase"}},
+        {"headerName": "Matches", "field": "Matches Played", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+        {"headerName": "Wins", "field": "Wins", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+        {"headerName": "Draws", "field": "Draws", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+        {"headerName": "Losses", "field": "Losses", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+        {"headerName": "Pts", "field": "Points", "flex": 1, "minWidth": 100, "cellStyle": {"font-weight": "bold", "backgroundColor": "#41054b", "color": "white"}},
+        {"headerName": "GD", "field": "Goal Difference", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+        {"headerName": "GS", "field": "Goals Scored", "flex": 1, "minWidth": 70, "cellStyle": default_style},    
+        {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70, "cellStyle": default_style},
+    ]
+
+    return pl_table_df, pl_table_col_defs
 
 def get_team_FDR_rating(team_fixtures_database, team_list):
     arsenal_fixtures = team_fixtures_database['Arsenal']
@@ -525,7 +569,7 @@ def get_team_FDR_rating(team_fixtures_database, team_list):
             team_fdr_rating_list.append(team_fdr_rating)
     team_fdr_rating_df = pd.DataFrame(team_fdr_rating_list)
     return team_fdr_rating_df
-            
+
 def create_team_fdr_database(team_fixtures_database):
     fdr_list = []
     for team in team_fixtures_database:
