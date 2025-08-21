@@ -25,6 +25,9 @@ def load_all_data():
     position_dict = utils.get_position_dict()
     status_dict = utils.get_status_dict()
     player_df = utils.return_player_df(player_json, pl_teams_dict, status_dict, position_dict)
+    dreamteam_df, dt_col_defs = utils.get_dream_team(player_df)
+    top_price_risers_df, pi_col_defs = utils.return_top_price_risers(player_df)
+    top_price_fallers_df, pd_col_defs = utils.return_top_price_fallers(player_df)
     fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict, player_df)
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
@@ -41,6 +44,9 @@ def load_all_data():
         "status_dict": status_dict,
         "player_df": player_df,
         "fixtures_df": fixtures_df,
+        "dreamteam_df": dreamteam_df,
+        "top_price_risers_df": top_price_risers_df,
+        "top_price_fallers_df": top_price_fallers_df,
         "fixture_col_defs": fixture_col_defs,
         "fixtures_database": fixtures_database,
         "fdr_database": fdr_database,
@@ -48,7 +54,10 @@ def load_all_data():
         "team_fdr_rating_df": team_fdr_rating_df,
         "pl_table_df" : pl_table_df,
         "pl_table_col_defs" : pl_table_col_defs,
-        "club_logos" : club_logos
+        "club_logos" : club_logos,
+        "dt_col_defs": dt_col_defs,
+        "pi_col_defs": pi_col_defs,
+        "pd_col_defs": pd_col_defs
     }
 
 if st.button("Refresh Data"):
@@ -71,10 +80,16 @@ fdr_avg_coldefs = data["fdr_avg_coldefs"]
 team_fdr_rating_df = data["team_fdr_rating_df"]
 pl_table_df = data["pl_table_df"]
 pl_table_col_defs = data["pl_table_col_defs"]
+dreamteam_df = data["dreamteam_df"]
+dt_col_defs = data["dt_col_defs"]
+top_price_risers_df = data["top_price_risers_df"]
+pi_col_defs = data["pi_col_defs"]
+top_price_fallers_df = data["top_price_fallers_df"]
+pd_col_defs = data["pd_col_defs"]
 
 utils.render_title_with_bg('Top Performers')
 
-topperformers1, topperformers2 = st.columns(2)
+topperformers1, topperformers2, topperformers3 = st.columns([2,1.1,0.9])
 
 with topperformers1:
     top_performers_options = ['Most Points', 'Best Form', 'Best Value', 'Best Goalkeepers', 'Best Defenders', 'Best Midfielders', 'Best Forwards']
@@ -98,19 +113,27 @@ with topperformers1:
     utils.build_aggrid_table(display_df, col_defs=coldefs)
     
 with topperformers2:
-    player_cards_dict = utils.get_top_stats_for_player_cards(player_df)
-    row1 = st.columns(3)
-    row2 = st.columns(3)
+    utils.render_subheaders('Season Dream Team', margin_top=5, margin_bottom=5)
+    utils.build_aggrid_table(dreamteam_df, col_defs=dt_col_defs)
 
-    for i, (label, df_row) in enumerate(player_cards_dict.items()):
-        player_row = df_row.iloc[0]
-        stat_value = player_row[label]
-
-        col = row1[i] if i < 3 else row2[i-3]
-        with col:
-            utils.render_player_card(player_row, label, stat_value)
+with topperformers3:
+    utils.render_subheaders('Price Risers and Fallers', margin_top=5, margin_bottom=5)
+    with st.container(key="price-movement"):
+        utils.build_aggrid_table(top_price_risers_df, col_defs=pi_col_defs)
+        utils.build_aggrid_table(top_price_fallers_df, col_defs=pd_col_defs)
 
 utils.render_divider()
+
+player_cards_dict = utils.get_top_stats_for_player_cards(player_df)
+
+row1 = st.columns(6)
+row2 = st.columns(6)
+for i, (label, df_row) in enumerate(player_cards_dict.items()):
+    player_row = df_row.iloc[0]
+    stat_value = player_row[label]
+    col = row1[i] if i < 6 else row2[i-6]
+    with col:
+        utils.render_player_card(player_row, label, stat_value)
 
 utils.render_title_with_bg('Premier League - 2025/26')
 
@@ -136,7 +159,7 @@ with fixtures1:
     
 with fixtures2:
     team_FDR = st.selectbox(
-        '', 
+        'Blank', 
         options=pl_teams_list, 
         placeholder="Choose a team", 
         label_visibility='collapsed',

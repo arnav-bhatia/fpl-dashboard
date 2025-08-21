@@ -176,6 +176,8 @@ def return_player_df(
             'Clean Sheets': player.get('clean_sheets'),
             'Goals Conceded': player.get('goals_conceded'),
             'Own Goals': player.get('own_goals'),
+            'Price Increase': 0 if player.get('cost_change_start') < 0 else player.get('cost_change_start')/10,
+            'Price Decrease': 0 if player.get('cost_change_start_fall') < 0 else (player.get('cost_change_start_fall')*-1)/10,
             'Penalties Saved': player.get('penalties_saved'),
             'Penalties Missed': player.get('penalties_missed'),
             'Yellow Cards': player.get('yellow_cards'),
@@ -219,7 +221,71 @@ def return_player_df(
     return pd.DataFrame(player_database)
 
 
-# ------------------- Helper functions for fixtures -------------------
+def get_dream_team(player_df, DREAM_TEAM_URL="https://fantasy.premierleague.com/api/dream-team/"):
+    try:
+        response = requests.get(DREAM_TEAM_URL, timeout=10)
+        response.raise_for_status()
+        dream_team = response.json()
+        players = player_df.copy()
+        players = players.set_index('ID', drop=True)
+        dt_players = []
+        for row in dream_team['team']:
+            points = row['points']
+            player_row = players.loc[row['element'], :]
+            name = player_row['Name']
+            club = player_row['Club']
+            position = player_row['Position']
+            price = player_row['Price']
+            form = player_row['Form']
+            player = {
+                "Name": name,
+                "Position": position,
+                "Club": club,
+                "Price": price,
+                "Points": points,
+                "Form": form
+            }
+            dt_players.append(player)
+
+        dt_col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Position", "field": "Position", "flex": 1, "minWidth": 90},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Points", "field": "Points", "flex": 1, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
+        {"headerName": "Form", "field": "Form", "flex": 1, "minWidth": 70},
+
+        ]
+
+        return pd.DataFrame(dt_players), dt_col_defs
+    except requests.exceptions.HTTPError as http_err:
+        raise RuntimeError(f"HTTP error occurred while fetching dream team data: {http_err}")
+    except requests.exceptions.Timeout:
+        raise RuntimeError("Request timed out while fetching dream team data.")
+    except Exception as err:
+        raise RuntimeError(f"An error occurred while fetching dream team data: {err}")
+
+def return_top_price_risers(player_df):
+    price_increase_df = player_df[['Name', 'Club', 'Price Increase', 'Price']].sort_values(by='Price Increase', ascending=False).head(5)
+
+    pi_col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Increase", "field": "Price Increase", "flex": 1, "minWidth": 90, "cellStyle": {"color":"green", "font-weight": "bold"}},
+        ]
+    return price_increase_df, pi_col_defs
+
+def return_top_price_fallers(player_df):
+    price_decrease_df = player_df[['Name', 'Club', 'Price Decrease', 'Price']].sort_values(by='Price Decrease', ascending=True).head(5)
+
+    pd_col_defs = [
+        {"headerName": "Name", "field": "Name", "flex": 2, "minWidth": 100, "pinned": "left", "cellStyle": {"font-weight": "bold", "text-transform": "uppercase"}},
+        {"headerName": "Club", "field": "Club", "flex": 1, "minWidth": 100},
+        {"headerName": "Price", "field": "Price", "flex": 1, "minWidth": 70},
+        {"headerName": "Decrease", "field": "Price Decrease", "flex": 1, "minWidth": 90, "cellStyle": {"color":"red", "font-weight": "bold"}},
+        ]
+    return price_decrease_df, pd_col_defs
 
 def convert_utc_to_ist(datetime_str: str) -> datetime:
     """
@@ -359,7 +425,8 @@ def return_fixtures_df(fixtures_json: List[Dict[str, Any]], team_dict: Dict[int,
         {"headerName": "Away Team", "field": "Away Team", "flex": 1.5, "minWidth": 100},
         {"headerName": "Score", "field": "Score", "flex": 2, "minWidth": 70, "cellStyle": {"font-weight": "bold"}},
         {"headerName": "Date", "field": "Match Date", "flex": 1, "minWidth": 70},
-        {"headerName": "Time (IST)", "field": "Match Time (IST)", "flex": 1, "minWidth": 70},        {"headerName": "Home Scorers", "field": "Home Team Scorers", "flex": 2, "minWidth": 100},
+        {"headerName": "Time (IST)", "field": "Match Time (IST)", "flex": 1, "minWidth": 70},        
+        {"headerName": "Home Scorers", "field": "Home Team Scorers", "flex": 2, "minWidth": 100},
         {"headerName": "Away Scorers", "field": "Away Team Scorers", "flex": 2, "minWidth": 100},
         {"headerName": "Home Assisters", "field": "Home Team Assisters", "flex": 2, "minWidth": 100},
         {"headerName": "Away Assisters", "field": "Away Team Assisters", "flex": 2, "minWidth": 100},
@@ -899,20 +966,33 @@ def return_top_forwards(player_database: pd.DataFrame, top_n: int = 10) -> pd.Da
     return df, col_defs
 
 def get_top_stats_for_player_cards(player_df):
-    player_df = player_df.copy()
-    cols_to_numeric = ['Total Points', 'Goals Scored', 'Assists', 'ICT Index', 'Clean Sheets', 'Defensive Contributions']
-    player_df[cols_to_numeric] = player_df[cols_to_numeric].apply(pd.to_numeric, errors='coerce')
-    most_points = player_df.nlargest(1, 'Total Points', keep='first') 
-    most_goals = player_df.nlargest(1, 'Goals Scored', keep='first') 
-    most_assists = player_df.nlargest(1, 'Assists', keep='first') 
-    top_ict = player_df.nlargest(1, 'ICT Index', keep='first') 
-    most_cleansheets = player_df.nlargest(1, 'Clean Sheets', keep='first') 
-    most_defensive_contributions = player_df.nlargest(1, 'Defensive Contributions', keep='first') 
+    df = player_df.copy()
+    cols_to_numeric = ['Total Points', 'Selected By (%)', 'Goals Scored', 'Assists', 'ICT Index', 'Clean Sheets', 'Form', 'Value', 'Defensive Contributions', 'Expected Goal Involvements', 'Saves', 'BPS']
+    df[cols_to_numeric] = df[cols_to_numeric].apply(pd.to_numeric, errors='coerce')
+    df = df.rename(columns={'Selected By (%)': 'Selected (%)', 'Expected Goal Involvements': 'xGI'})
+    most_points = df.nlargest(1, 'Total Points', keep='first') 
+    most_goals = df.nlargest(1, 'Goals Scored', keep='first') 
+    most_assists = df.nlargest(1, 'Assists', keep='first') 
+    top_ict = df.nlargest(1, 'ICT Index', keep='first') 
+    most_cleansheets = df.nlargest(1, 'Clean Sheets', keep='first') 
+    most_defensive_contributions = df.nlargest(1, 'Defensive Contributions', keep='first')
+    most_selected = df.nlargest(1, 'Selected (%)', keep='first') 
+    top_form = df.nlargest(1, 'Form', keep='first') 
+    top_value = df.nlargest(1, 'Value', keep='first') 
+    top_xGI = df.nlargest(1, 'xGI', keep='first') 
+    most_saves = df.nlargest(1, 'Saves', keep='first') 
+    most_bps = df.nlargest(1, 'BPS', keep='first') 
     return { 
-            'Total Points' : most_points, 
-            'Goals Scored' : most_goals, 
-            'Assists' : most_assists, 
-            'ICT Index' : top_ict, 
+            'Total Points' : most_points,
+            'Selected (%)' : most_selected,
             'Clean Sheets' : most_cleansheets, 
-            'Defensive Contributions' : most_defensive_contributions 
+            'Goals Scored' : most_goals, 
+            'Assists' : most_assists,
+            'BPS' : most_bps,
+            'Saves' : most_saves,      
+            'Defensive Contributions' : most_defensive_contributions,
+            'xGI' : top_xGI,
+            'ICT Index' : top_ict, 
+            'Form' : top_form,
+            'Value' : top_value,
             }

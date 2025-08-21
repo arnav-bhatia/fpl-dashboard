@@ -16,6 +16,10 @@
     border-radius: 10px
 }
 
+.st-key-price-movement [data-testid="stVerticalBlock"]{
+    gap: 0;
+}
+
 .st-key-fdr-metric div[data-testid="stMetric"] label{
     text-align: center !important;
     width: 100%;

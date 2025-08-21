@@ -234,25 +234,4 @@ def map_fdr_colour(fdr):
         return "fdr-four"
     elif fdr == 5:
         return "fdr-five"
-    
-def style_fdr_section():
-    st.markdown(
-        f"""
-        <style>
-        div[data-testid="stSelectbox"] {{
-            padding: 1px;
-            border-radius: 10px; 
-            border: 1px solid #FF2DD1;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }}
 
-        div[class="stVerticalBlock st-emotion-cache-159b5ki eceldm42"] {{
-            gap: 0;
-        }}
-        
-        div[class="stVerticalBlock st-emotion-cache-159b5ki eceldm42"] {{
-            gap: 5px;
-        }}
-        </style>
-        """, unsafe_allow_html=True)
