@@ -32,10 +32,8 @@ def load_all_data():
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
     team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
-    pl_table_df, pl_table_col_defs = utils.build_pl_table(pl_teams_list, fixtures_database, utils.get_team_fixtures)
-    club_logos = utils.load_club_logos("assets/Club Logos")
-    pl_table_df["Logo"] = pl_table_df["Team"].map(club_logos).fillna("")
-    
+    pl_table_df, pl_table_col_defs = utils.build_pl_table(pl_teams_list,fixtures_database,utils.get_team_fixtures)
+
     return {
         "player_json": player_json,
         "pl_teams_dict": pl_teams_dict,
@@ -54,7 +52,6 @@ def load_all_data():
         "team_fdr_rating_df": team_fdr_rating_df,
         "pl_table_df" : pl_table_df,
         "pl_table_col_defs" : pl_table_col_defs,
-        "club_logos" : club_logos,
         "dt_col_defs": dt_col_defs,
         "pi_col_defs": pi_col_defs,
         "pd_col_defs": pd_col_defs
@@ -141,7 +138,7 @@ pl_table, pl_fixtures = st.columns(2)
 
 with pl_table:
     utils.render_subheaders('Table', margin_top=5, margin_bottom=5)
-    utils.build_aggrid_table(pl_table_df, col_defs=pl_table_col_defs, pagination=True, max_height=370, alt_row_colours=False)
+    utils.build_aggrid_table(pl_table_df, col_defs=pl_table_col_defs, pagination=True, max_height=370, alt_row_colours=False, pl_table=True)
 
 with pl_fixtures:
     utils.render_subheaders('Fixtures', margin_top=5, margin_bottom=5)

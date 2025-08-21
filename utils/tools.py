@@ -8,7 +8,8 @@ def build_aggrid_table(
     pagination=False, 
     max_height=1000, 
     alt_row_colours=True, 
-    FDR=False
+    FDR=False,
+    pl_table=False
 ):
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_pagination(enabled=pagination)
@@ -56,33 +57,41 @@ def build_aggrid_table(
         """)
         grid_options["getRowStyle"] = row_style
 
-    # Premier League table coloring
-    # elif pl_table:
-    #     row_style = JsCode(f"""
-    #         function(params) {{
-    #             var pos = parseInt(params.data["Position"], 10);
-    #             if (isNaN(pos)) return null;
+    elif pl_table:
+        row_style = JsCode(f"""
+            function(params) {{
+                var pos = parseInt(params.data["Position"], 10);
+                if (isNaN(pos)) return {{
+                    'background-color': '#41054b',
+                    'color': 'white'
+                }};
 
-    #             var bg = null, color = "white";
-    #             if (pos === 1) {{
-    #                 bg = "#ffbf00"; color = "white";       // Champions
-    #             }} else if (pos >= 2 && pos <= 5) {{
-    #                 bg = "#3bb552";                     // CL spots (blue)
-    #             }} else if (pos === 6) {{
-    #                 bg = "#288eea";                      // Europa League
-    #             }} else if (pos === 7) {{
-    #                 bg = "#0ad8d8";                       // Conference League
-    #             }} else if (pos >= 18 && pos <= 20) {{
-    #                 bg = "red";                         // Relegation
-    #             }} else {{
-    #                 bg = "#41054b";
-    #             }}
+                // default values
+                var baseBg = '#41054b';
+                var textColor = 'white';
+                var borderColor = baseBg;
 
-    #             if (bg) return {{ 'background-color': bg, 'color': color }};
-    #             return null;
-    #         }}
-    #     """)
-    #     grid_options["getRowStyle"] = row_style
+                if (pos === 1) {{
+                    borderColor = '#ffbf00';    // Champions
+                }} else if (pos >= 2 && pos <= 5) {{
+                    borderColor = '#3bb552';    // CL spots
+                }} else if (pos === 6) {{
+                    borderColor = '#288eea';    // Europa League
+                }} else if (pos === 7) {{
+                    borderColor = '#0ad8d8';    // Conference League
+                }} else if (pos >= 18 && pos <= 20) {{
+                    borderColor = 'red';        // Relegation
+                }}
+
+                return {{
+                    'background-color': baseBg,
+                    'color': textColor,
+                    'border-left': '6px solid ' + borderColor
+                }};
+            }}
+        """)
+        grid_options["getRowStyle"] = row_style
+
 
     custom_css = {
         ".ag-header-cell": {
