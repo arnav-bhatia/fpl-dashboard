@@ -1,6 +1,7 @@
 import streamlit as st
 import utils
 import pathlib
+import datetime, pytz
 
 st.set_page_config(
     page_title='FPL Analyzer',
@@ -17,8 +18,9 @@ load_css(css_path)
 
 st.title('FPL Analyzer')
 
-@st.cache_data
+@st.cache_data(ttl=900, show_spinner=False)
 def load_all_data():
+    fetched_at = datetime.datetime.now(tz=pytz.timezone("Asia/Kolkata"))
     player_json = utils.load_player_data()
     fixtures_json = utils.load_fixtures_data()
     pl_teams_dict, pl_teams_list = utils.get_pl_teams_dict_and_list(player_json)
@@ -31,10 +33,11 @@ def load_all_data():
     fixtures_df, fixture_col_defs = utils.return_fixtures_df(fixtures_json, pl_teams_dict, player_df)
     fixtures_database = utils.create_team_fixtures_database(fixtures_df, pl_teams_list)
     fdr_database, fdr_avg_coldefs = utils.create_team_fdr_database(fixtures_database)
-    team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_database, pl_teams_list)
+    team_fdr_rating_df = utils.get_team_FDR_rating(fixtures_df, pl_teams_list)
     pl_table_df, pl_table_col_defs = utils.build_pl_table(pl_teams_list,fixtures_database,utils.get_team_fixtures)
 
     return {
+        "fetched_at": fetched_at,
         "player_json": player_json,
         "pl_teams_dict": pl_teams_dict,
         "pl_teams_list": pl_teams_list,
@@ -63,6 +66,8 @@ if st.button("Refresh Data"):
 
 data = load_all_data()
 
+fresh = data["fetched_at"]
+st.caption(f"Data last updated: {fresh.strftime('%b %d, %Y %I:%M %p %Z')}")
 player_json = data["player_json"]
 pl_teams_dict = data["pl_teams_dict"]
 pl_teams_list = data["pl_teams_list"]
@@ -193,6 +198,6 @@ with fixtures3:
         delta_colour_5 = utils.calc_fdr_delta_colour(team_5gw_rank)
         delta_colour_10 = utils.calc_fdr_delta_colour(team_10gw_rank)
         st.metric(f"Average FDR for the next 5 GWs", team_5gw_avg_fdr, delta=f"PL Rank: {team_5gw_rank}", delta_color=delta_colour_5, border=True)
-        st.metric(f"Average FDR for the next 10 GWs", team_10gw_avg_fdr, delta=f"PL Rank: {team_10gw_rank}", delta_color=delta_colour_5, border=True)
+        st.metric(f"Average FDR for the next 10 GWs", team_10gw_avg_fdr, delta=f"PL Rank: {team_10gw_rank}", delta_color=delta_colour_10, border=True)
 
 utils.render_divider()

@@ -16,8 +16,8 @@
     border-radius: 10px
 }
 
-.st-key-price-movement [data-testid="stVerticalBlock"]{
-    gap: 0;
+.st-key-price-movement [data-testid="stVerticalBlockBorderWrapper"] div{
+    gap: 100px !important;
 }
 
 .st-key-fdr-metric div[data-testid="stMetric"] label{

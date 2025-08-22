@@ -1,9 +1,10 @@
 from typing import Tuple, Dict, List, Any
-from st_aggrid import JsCode
 import pandas as pd
 from datetime import datetime
 import requests
 import pytz
+
+HEADERS = {"User-Agent": "FPL-Analyzer/1.0 (+https://github.com/arnav/fpl-analyzer)"}
 
 def load_player_data(PLAYER_URL: str = "https://fantasy.premierleague.com/api/bootstrap-static/") -> Dict[str, Any]:
     """
@@ -19,7 +20,7 @@ def load_player_data(PLAYER_URL: str = "https://fantasy.premierleague.com/api/bo
         RuntimeError: If there is an HTTP error, timeout, or any other error during the API call.
     """
     try:
-        response = requests.get(PLAYER_URL, timeout=10)
+        response = requests.get(PLAYER_URL, timeout=10, headers=HEADERS)
         response.raise_for_status()
         player_json = response.json()
         return player_json
@@ -45,7 +46,7 @@ def load_fixtures_data(FIXTURES_URL: str = "https://fantasy.premierleague.com/ap
         RuntimeError: If there is an HTTP error, timeout, or any other error during the API call.
     """
     try:
-        response = requests.get(FIXTURES_URL, timeout=10)
+        response = requests.get(FIXTURES_URL, timeout=10, headers=HEADERS)
         response.raise_for_status()
         fixtures_json = response.json()
         return fixtures_json
@@ -200,7 +201,7 @@ def return_player_df(
 
 def get_dream_team(player_df, DREAM_TEAM_URL="https://fantasy.premierleague.com/api/dream-team/"):
     try:
-        response = requests.get(DREAM_TEAM_URL, timeout=10)
+        response = requests.get(DREAM_TEAM_URL, timeout=10, headers=HEADERS)
         response.raise_for_status()
         dream_team = response.json()
         players = player_df.copy()
@@ -577,31 +578,18 @@ def build_pl_table(pl_teams_list, fixtures_database, get_team_fixtures):
 
     return pl_table_df, pl_table_col_defs
 
-def get_team_FDR_rating(team_fixtures_database, team_list):
-    arsenal_fixtures = team_fixtures_database['Arsenal']
-    aston_villa_fixtures = team_fixtures_database['Aston Villa']
-    team_fdr_rating_list = []
+def get_team_FDR_rating(fixtures_df: pd.DataFrame, team_list: list[str]) -> pd.DataFrame:
+    out = []
     for team in team_list:
-        if team != 'Arsenal':
-            match_away = arsenal_fixtures[(arsenal_fixtures['Opponent']==team) & (arsenal_fixtures['Venue']=='Away')]
-            match_home = arsenal_fixtures[(arsenal_fixtures['Opponent']==team) & (arsenal_fixtures['Venue']=='Home')]
-            team_fdr_rating = {
-                'Team': match_home['Opponent'].iloc[0],
-                'Home FDR': match_home['Fixture Difficulty Rating'].iloc[0],
-                'Away FDR': match_away['Fixture Difficulty Rating'].iloc[0]
-            }
-            team_fdr_rating_list.append(team_fdr_rating)
-        else:
-            match_away = aston_villa_fixtures[(aston_villa_fixtures['Opponent']=='Arsenal') & (aston_villa_fixtures['Venue']=='Away')]
-            match_home = aston_villa_fixtures[(aston_villa_fixtures['Opponent']=='Arsenal') & (aston_villa_fixtures['Venue']=='Home')]
-            team_fdr_rating = {
-                'Team': match_home['Opponent'].iloc[0],
-                'Home FDR': match_home['Fixture Difficulty Rating'].iloc[0],
-                'Away FDR': match_away['Fixture Difficulty Rating'].iloc[0]
-            }
-            team_fdr_rating_list.append(team_fdr_rating)
-    team_fdr_rating_df = pd.DataFrame(team_fdr_rating_list)
-    return team_fdr_rating_df
+        home_row = fixtures_df.loc[fixtures_df['Home Team'] == team, 'Away Team Difficulty'].dropna()
+        away_row = fixtures_df.loc[fixtures_df['Away Team'] == team, 'Home Team Difficulty'].dropna()
+        if not home_row.empty and not away_row.empty:
+            out.append({
+                'Team': team,
+                'Home FDR': int(home_row.iloc[0]),
+                'Away FDR': int(away_row.iloc[0]),
+            })
+    return pd.DataFrame(out)
 
 def create_team_fdr_database(team_fixtures_database):
     fdr_list = []
@@ -787,7 +775,7 @@ def return_top_defenders(player_database: pd.DataFrame, top_n: int = 10) -> pd.D
         {"headerName": "Starts", "field": "Starts", "flex": 1, "minWidth": 70},
         {"headerName": "CS", "field": "Clean Sheets", "flex": 1, "minWidth": 50, "maxWidth": 90},
         {"headerName": "GC", "field": "Goals Conceded", "flex": 1, "minWidth": 70},
-        {"headerName": "DC", "field": "Defensive Contribution", "flex": 1, "minWidth": 70},
+        {"headerName": "DC", "field": "Defensive Contributions", "flex": 1, "minWidth": 70},
         {"headerName": "SBP", "field": "Selected By (%)", "flex": 1, "minWidth": 70},
         {"headerName": "ICT", "field": "ICT Index", "flex": 1, "minWidth": 70},
         {"headerName": "ICT Rank", "field": "ICT Index Rank Type", "flex": 1, "minWidth": 70},

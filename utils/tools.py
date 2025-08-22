@@ -27,9 +27,9 @@ def build_aggrid_table(
         row_style = JsCode("""
             function(params) {
                 if (params.node.rowIndex % 2 === 0) {
-                    return {'background-color': '#FED6F8', 'color': 'black'};
+                    return {'background-color': '#1E1E28', 'color': '#F5F7FA'};
                 } else {
-                    return {'background-color': 'white', 'color': 'black'};
+                    return {'background-color': '#232334', 'color': '#F5F7FA'};
                 }
             }
         """)
