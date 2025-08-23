@@ -23,6 +23,7 @@ def load_all_data():
     fetched_at = datetime.datetime.now(tz=pytz.timezone("Asia/Kolkata"))
     player_json = utils.load_player_data()
     fixtures_json = utils.load_fixtures_data()
+    current_gw = utils.get_current_gameweek(player_json)
     pl_teams_dict, pl_teams_list = utils.get_pl_teams_dict_and_list(player_json)
     position_dict = utils.get_position_dict()
     status_dict = utils.get_status_dict()
@@ -39,6 +40,7 @@ def load_all_data():
     return {
         "fetched_at": fetched_at,
         "player_json": player_json,
+        "current_gw": current_gw,
         "pl_teams_dict": pl_teams_dict,
         "pl_teams_list": pl_teams_list,
         "position_dict": position_dict,
@@ -69,6 +71,7 @@ data = load_all_data()
 fresh = data["fetched_at"]
 st.caption(f"Data last updated: {fresh.strftime('%b %d, %Y %I:%M %p %Z')}")
 player_json = data["player_json"]
+current_gw = data["current_gw"]
 pl_teams_dict = data["pl_teams_dict"]
 pl_teams_list = data["pl_teams_list"]
 position_dict = data["position_dict"]

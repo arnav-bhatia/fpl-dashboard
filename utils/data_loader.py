@@ -57,9 +57,12 @@ def load_fixtures_data(FIXTURES_URL: str = "https://fantasy.premierleague.com/ap
     except Exception as err:
         raise RuntimeError(f"An error occurred while fetching fixture data: {err}")
 
-
-# Mapping dictionaries and lists
-
+def get_current_gameweek(player_json: Dict[str, Any]):
+    for gw in player_json['events']:
+        if gw['is_current']:
+            current_gw = gw['id']
+    return current_gw
+    
 def get_pl_teams_dict_and_list(player_json: Dict[str, Any]) -> Tuple[Dict[int, str], List[str]]:
     """
     Returns all Premier League teams and their FPL IDs.

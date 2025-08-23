@@ -1,6 +1,7 @@
 from .data_loader import (
     load_player_data,
     load_fixtures_data,
+    get_current_gameweek,
     get_pl_teams_dict_and_list,
     get_position_dict,
     get_status_dict,
@@ -46,6 +47,7 @@ from  .tools import(
 __all__ = [
     "load_player_data",
     "load_fixtures_data",
+    "get_current_gameweek",
     "get_pl_teams_dict_and_list",
     "get_position_dict",
     "get_status_dict",

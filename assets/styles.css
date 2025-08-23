@@ -16,9 +16,33 @@
     border-radius: 10px
 }
 
-.st-key-price-movement [data-testid="stVerticalBlockBorderWrapper"] div{
-    gap: 100px !important;
+/* 1) Remove Streamlit’s default vertical stack spacing */
+.st-key-price-movement [data-testid="stVerticalBlock"] {
+  row-gap: 0 !important;
+  gap: 0 !important;
 }
+
+/* 2) Kill spacer divs Streamlit inserts */
+.st-key-price-movement [data-testid="stVerticalBlockSpacer"] {
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 3) Reset children margins/padding */
+.st-key-price-movement [data-testid="stVerticalBlock"] > div {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 4) Ensure AgGrid wrappers don’t add their own spacing */
+.st-key-price-movement .stAgGrid,
+.st-key-price-movement .ag-root-wrapper,
+.st-key-price-movement .ag-root-wrapper-body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 
 .st-key-fdr-metric div[data-testid="stMetric"] label{
     text-align: center !important;
