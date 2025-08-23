@@ -1,0 +1,18 @@
+{
+    "player": {
+        "date_of_birth": "2002-04-27",
+        "default_event": 2,
+        "dirty": false,
+        "first_name": "Arnav",
+        "gender": "M",
+        "id": 31711592,
+        "last_name": "Bhatia",
+        "region": 100,
+        "email": "arnav.zomuana@gmail.com",
+        "entry": 5252797,
+        "entry_email": false,
+        "entry_language": null,
+        "sso_id": "4b237f22-a95f-4d92-b825-9fab3483d1a0"
+    },
+    "watched": []
+}
