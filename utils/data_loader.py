@@ -3,8 +3,23 @@ import pandas as pd
 from datetime import datetime
 import requests
 import pytz
+import utils
+import requests
 
 HEADERS = {"User-Agent": "FPL-Analyzer/1.0 (+https://github.com/arnav/fpl-analyzer)"}
+
+def get_my_team(team_id: str):
+    tokens = utils.authenticate()
+    access_token = tokens["access_token"]
+
+    url = f"https://fantasy.premierleague.com/api/my-team/{team_id}/"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Failed to fetch team data: {response.status_code} {response.text}")
 
 def load_player_data(PLAYER_URL: str = "https://fantasy.premierleague.com/api/bootstrap-static/") -> Dict[str, Any]:
     """

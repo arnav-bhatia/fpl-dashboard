@@ -1,4 +1,5 @@
 from .data_loader import (
+    get_my_team,
     load_player_data,
     load_fixtures_data,
     get_current_gameweek,
@@ -44,7 +45,20 @@ from  .tools import(
     map_fdr_colour
 )
 
+from .auth import (
+    generate_code_verifier,
+    generate_code_challenge,
+    authenticate,
+    refresh_tokens
+)
+
+
 __all__ = [
+    "get_my_team",
+    "generate_code_verifier",
+    "generate_code_challenge",
+    "authenticate",
+    "refresh_tokens",
     "load_player_data",
     "load_fixtures_data",
     "get_current_gameweek",

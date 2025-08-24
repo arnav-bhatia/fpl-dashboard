@@ -26,3 +26,6 @@ Thumbs.db
 
 # Data files (if you want to exclude large or raw data files)
 data/
+
+# Env file for Auth
+.env
