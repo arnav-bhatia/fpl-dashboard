@@ -1,4 +1,6 @@
 from .data_loader import (
+    load_manager_gw_history,
+    load_manager_details,
     get_my_team,
     load_player_data,
     load_fixtures_data,
@@ -54,6 +56,8 @@ from .auth import (
 
 
 __all__ = [
+    "load_manager_gw_history",
+    "load_manager_details",
     "get_my_team",
     "generate_code_verifier",
     "generate_code_challenge",

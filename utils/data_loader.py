@@ -1,12 +1,70 @@
 from typing import Tuple, Dict, List, Any
-import pandas as pd
+from urllib.parse import urljoin
 from datetime import datetime
+import pandas as pd
 import requests
 import pytz
 import utils
 import requests
 
 HEADERS = {"User-Agent": "FPL-Analyzer/1.0 (+https://github.com/arnav/fpl-analyzer)"}
+
+def load_manager_details(ENTRY_URL: str = "https://fantasy.premierleague.com/api/entry", manager_id="5252797"):
+    MANAGER_URL = urljoin(f"{ENTRY_URL}/", manager_id)
+    try:
+        response = requests.get(MANAGER_URL, timeout=10, headers=HEADERS)
+        response.raise_for_status()
+        manager_json = response.json()
+        manager_details = {
+            'First Name': manager_json['player_first_name'],
+            'Last Name': manager_json['player_last_name'],
+            'Team Name': manager_json['name'],
+            'Total Points': manager_json['summary_overall_points'],
+            'Global Rank': manager_json['summary_overall_rank']
+        }
+        manager_league_list = []
+        for league in manager_json['leagues']['classic']:
+            league_details = {
+                'Name': league['name'],
+                'Rank': league['entry_rank'],
+                'Total Players': league['rank_count']
+            }
+            manager_league_list.append(league_details)
+    
+        manager_league_df = pd.DataFrame(manager_league_list)
+        manager_league_df['Percentile'] = round((manager_league_df['Rank']/manager_league_df['Total Players'])*100, 0)
+        return manager_league_df, manager_details
+        
+    except requests.exceptions.HTTPError as http_err:
+        raise RuntimeError(f"HTTP error occurred while fetching player data: {http_err}")
+    except requests.exceptions.Timeout:
+        raise RuntimeError("Request timed out while fetching player data.")
+    except Exception as err:
+        raise RuntimeError(f"An error occurred while fetching player data: {err}")
+
+def load_manager_gw_history(ENTRY_URL: str = "https://fantasy.premierleague.com/api/entry", manager_id="5252797"):
+    MANAGER_HISTORY_URL = urljoin(f"{ENTRY_URL}/", f"{manager_id}/history")
+    try:
+        response = requests.get(MANAGER_HISTORY_URL, timeout=10, headers=HEADERS)
+        response.raise_for_status()
+        gw_history_json = response.json()
+        user_gw_history = []
+        for gw in gw_history_json['current']:
+            gw_details = {
+                'GW': gw['event'],
+                'Points': gw['points'],
+                'Rank': gw['overall_rank']
+            }
+            user_gw_history.append(gw_details)
+            
+        user_gw_history_df = pd.DataFrame(user_gw_history)
+        return user_gw_history_df
+    except requests.exceptions.HTTPError as http_err:
+        raise RuntimeError(f"HTTP error occurred while fetching player data: {http_err}")
+    except requests.exceptions.Timeout:
+        raise RuntimeError("Request timed out while fetching player data.")
+    except Exception as err:
+        raise RuntimeError(f"An error occurred while fetching player data: {err}")
 
 def get_my_team(team_id: str):
     tokens = utils.authenticate()

@@ -13,6 +13,8 @@ st.title('FPL Analyzer - Home Page')
 @st.cache_data(ttl=900, show_spinner=False)
 def load_all_data():
     fetched_at = datetime.datetime.now(tz=pytz.timezone("Asia/Kolkata"))
+    manager_league_df, manager_details_dict = utils.load_manager_details()
+    manager_gw_history = utils.load_manager_gw_history()
     player_json = utils.load_player_data()
     fixtures_json = utils.load_fixtures_data()
     current_gw = utils.get_current_gameweek(player_json)
@@ -31,6 +33,9 @@ def load_all_data():
 
     return {
         "fetched_at": fetched_at,
+        "manager_league_df": manager_league_df,
+        "manager_details_dict": manager_details_dict,
+        "manager_gw_history": manager_gw_history,
         "player_json": player_json,
         "current_gw": current_gw,
         "pl_teams_dict": pl_teams_dict,
@@ -54,14 +59,17 @@ def load_all_data():
         "pd_col_defs": pd_col_defs
     }
 
-if st.button("Refresh Data"):
-    load_all_data.clear()
-    st.rerun()
+with st.sidebar:
+    if st.button("Refresh Data"):
+        load_all_data.clear()
+        st.rerun()
 
 data = load_all_data()
 
 fresh = data["fetched_at"]
-st.caption(f"Data last updated: {fresh.strftime('%b %d, %Y %I:%M %p %Z')}")
+manager_league_df = data["manager_league_df"]
+manager_details_dict = data["manager_details_dict"]
+manager_gw_history = data["manager_gw_history"]
 player_json = data["player_json"]
 current_gw = data["current_gw"]
 pl_teams_dict = data["pl_teams_dict"]
@@ -84,7 +92,19 @@ pi_col_defs = data["pi_col_defs"]
 top_price_fallers_df = data["top_price_fallers_df"]
 pd_col_defs = data["pd_col_defs"]
 
+with st.sidebar:
+    st.caption(f"Data last updated: {fresh.strftime('%b %d, %Y %I:%M %p %Z')}")
+
+
 for key, value in data.items():
     st.session_state[key] = value
 
-st.success('Data LOADED!')
+st.subheader(f"Welcome, {manager_details_dict['First Name']} {manager_details_dict['Last Name']}!")
+
+utils.render_title_with_bg(f"{manager_details_dict['Team Name']} Summary")
+
+managersum1, managersum2 = st.columns(2)
+with managersum1:
+    st.metric("Total Points", manager_details_dict['Total Points'], border=True)
+with managersum2:
+    st.metric("Overall Rank", manager_details_dict['Global Rank'], border=True)
